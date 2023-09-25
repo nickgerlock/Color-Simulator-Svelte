@@ -4,9 +4,10 @@
   export let colorTemperature: number = 4000;
   export let filterStrength: number = 1.0;
 
+  import shuffleArray from 'shuffle-array'
   import ColorBox from './color_box.svelte';
   import type { Color } from './lib/color';
-  import { scaleColor, filterColor, colorString } from './lib/color';
+  import { scaleColor, mix } from './lib/color';
   import { temperatureToRGB } from './lib/color_temperature';
   import {
     White,
@@ -17,9 +18,12 @@
     Yellow,
     Magenta,
     Cyan,
+    Orange,
+    Azure
   } from './lib/colors';
 
-  const MAX_WIDTH_PER_NUM_COPIES = 200;
+  const MAX_WIDTH_PER_NUM_COPIES = 400;
+  const LIGHT_GROUP_SIZE = 4;
   const pureColors = [
     White,
     Black,
@@ -30,25 +34,47 @@
     Magenta,
     Cyan,
   ];
+  const christmasColors = [
+    Blue,
+    Green,
+    Orange,
+    Red,
+  ];
+  const whites = [
+    White,
+    White,
+    White,
+    White,
+  ];
 
   const numCopies = 1;
   let itemsPerRow: number;
-  let maxWidth: string;
+  let boxSize: string;
 
-  let colors: [string, string, string][];
+  let colors: Color[];
   let lightSource: Color;
-  let lightRows: [string, string, string][][];
+  let lightRows: Color[][];
 
-  $: maxWidth = `${MAX_WIDTH_PER_NUM_COPIES / numCopies}px`;
+  const partition: <T>(array: Array<T>, chunkSize: number) => Array<Array<T>> = <T,>(array: Array<T>, chunkSize: number) => {
+    const numChunks = Math.ceil(array.length / chunkSize);
+    return new Array(numChunks).fill(undefined).map((_, chunkIndex) => {
+        return array.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
+    });
+  };
+
+  const colorPool = [
+    ...christmasColors,
+    ...christmasColors,
+    ...christmasColors,
+    ...christmasColors,
+    ...christmasColors,
+    ...christmasColors,
+  ]
+
+  $: boxSize = `${MAX_WIDTH_PER_NUM_COPIES / numCopies}px`;
   $: lightSource = scaleColor(temperatureToRGB(colorTemperature), brightness);
-  $: colors = pureColors.map(color => {
-    return [
-      colorString(scaleColor(filterColor(lightSource, scaleColor(color, 1.5), filterStrength), 1.0)),
-      colorString(scaleColor(filterColor(lightSource, scaleColor(color, 1.75), filterStrength * 0.7), 1.2)),
-      colorString(scaleColor(filterColor(lightSource, scaleColor(color, 2.0), filterStrength * 0.2), 1.4)),
-    ];
-  });
-  $: lightRows = [colors.slice(0, colors.length / 2), colors.slice(colors.length / 2)];
+  $: colors = colorPool;
+  $: lightRows = partition(colors, LIGHT_GROUP_SIZE);
   $: itemsPerRow = colors.length;
 
 </script>
@@ -56,9 +82,9 @@
 <div class="color_simulator">
   <div class='light_rows' style='--itemsPerRow:{itemsPerRow}'>
     {#each lightRows as lightRow}
-      <div class='light_row' style="--maxWidth:{maxWidth}">
+      <div class='light_row' style="--boxSize:{boxSize}">
         {#each lightRow as light}
-          <ColorBox --color1={light[0]} --color2={light[1]} --color3={light[2]} --maxWidth={maxWidth}></ColorBox>
+          <ColorBox lightSource={lightSource} color={light} filterStrength={filterStrength} --boxSize={boxSize}></ColorBox>
         {/each}
       </div>
     {/each}
@@ -70,27 +96,36 @@
     animation: fadein 0.4s;
     display: flex;
     flex-grow: 1;
+    flex-shrink: 1;
     height: 100%;
+    max-height: 800px;
   }
   .light_rows {
+    max-height: 100%;
+    overflow: scroll;
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     flex-direction: row;
     flex-wrap: wrap;
     flex-grow: 1;
+    flex-shrink: 1;
     flex-basis: 300px;
     margin: auto;
-    max-width: 80vw;
+    padding-left: 2em;
+    padding-right: 2em;
+    /* max-width: 80vw; */
     gap: 2%;
     row-gap: 2%;
   }
   .light_row {
+    overflow: visible;
     flex-grow: 1;
+    flex-shrink: 1;
     flex-direction: row;
     display: flex;
     gap: 4%;
-    flex-basis: var(--maxWidth, 200px);
-    min-width: 250px;
+    flex-basis: var(--boxSize, 200px);
+    /* min-width: 250px; */
     padding-bottom: 4%;
   }
   @keyframes fadein {

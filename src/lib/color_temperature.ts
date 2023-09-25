@@ -1,4 +1,4 @@
-import { addColors, scaleColor } from './color';
+import { mix } from './color';
 import type { Color } from './color';
 export type ColorTemp = [number, Color];
 
@@ -8,9 +8,8 @@ export function temperatureToRGB(kelvin: number): Color {
   if (leftSide === rightSide) return leftSide[1];
 
   const progressFromLeftToRight = (kelvin - leftSide[0]) / (rightSide[0] - leftSide[0]);
-  const interpolated = addColors(scaleColor(leftSide[1], (1 - progressFromLeftToRight)), scaleColor(rightSide[1], progressFromLeftToRight));
 
-  return interpolated;
+  return mix(leftSide[1], rightSide[1], 1 - progressFromLeftToRight);
 }
 
 // TODO: use color function to make these shorter. define inline with list.

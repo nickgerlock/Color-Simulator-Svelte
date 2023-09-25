@@ -18,8 +18,6 @@
       <ColorSimulator brightness={brightness} colorTemperature={colorTemperature} filterStrength={filterStrength}></ColorSimulator>
     </div>
 
-    <hr>
-
     <div class="color_controls_container">
       <ColorControls bind:brightness={brightness} bind:colorTemperature={colorTemperature} bind:filterStrength={filterStrength}></ColorControls>
     </div>
@@ -60,14 +58,14 @@
     flex-grow: 0;
   }
   .content {
+    overflow: scroll;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
-    max-height: 800px;
+    /* flex-grow: 1; */
+    /* max-height: 800px; */
   }
 
   .color_simulator_container {
-    display: flex;
     padding-top: 4vh;
     padding-bottom: 4vh;
     flex-grow: 1;
