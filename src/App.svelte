@@ -49,33 +49,44 @@
 
   .page {
     height: 100%;
-    margin: 8px;
-    padding: 8px;
+    /* margin: 8px;
+    padding: 8px; */
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
   }
   .header {
+    box-sizing: border-box;
+    padding: 8px;
+    margin: 8px;
     flex-grow: 0;
+    flex-basis: 10%;
+    max-height: 10%;
   }
   .content {
+    box-sizing: border-box;
     overflow: visible;
     display: flex;
     flex-direction: column;
     /* flex-grow: 1; */
-    /* max-height: 800px; */
+    flex-basis: 90%;
+    max-height: 90%;
   }
 
   .color_simulator_container {
+    overflow: scroll;
     padding-top: 4vh;
     padding-bottom: 4vh;
-    flex-grow: 1;
+    box-sizing: border-box;
+    flex-basis: 70%;
+    max-height: 70%;
   }
 
   .color_controls_container {
     display: flex;
     align-items: flex-end;
-    flex-grow: 1;
-    flex-grow: 1;
+    flex-basis: 30%;
+    flex-shrink: 1;
   }
 
 </style>

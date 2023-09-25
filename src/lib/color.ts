@@ -23,6 +23,13 @@ export function scaleColor(color: Color, scalar: number = 1.0) {
   };
 }
 
+export function setBrightness(color: Color, targetBrightness = 0.5) {
+  const brightness = getBrightness(color);
+  if (brightness === 0) return color;
+
+  return scaleColor(color, targetBrightness / brightness);
+}
+
 export function getBrightness(color: Color) {
   return getEnergy(color) / (MAXIMUM_COLOR_VALUE * 3);
 }

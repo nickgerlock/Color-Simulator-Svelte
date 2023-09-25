@@ -4,10 +4,16 @@
   export let colorTemperature: number = 4000;
   export let filterStrength: number = 1.0;
 
+  // TODO move definition. probably change it
+  type Light = {color: Color, brightness?: number};
+
+  import { onMount } from 'svelte';
+  import bezier from 'bezier-easing';
   import shuffleArray from 'shuffle-array'
+
   import ColorBox from './color_box.svelte';
   import type { Color } from './lib/color';
-  import { scaleColor, mix } from './lib/color';
+  import { scaleColor, mix, color } from './lib/color';
   import { temperatureToRGB } from './lib/color_temperature';
   import {
     White,
@@ -21,6 +27,41 @@
     Orange,
     Azure
   } from './lib/colors';
+  import { partition, repeatArray, repeat } from './lib/utils';
+
+  function getLights(colors: Color[], glow: boolean, currentTime: Date, offsets?: number[]): Light[] {
+    const GLOW_PERIOD = 8_000;
+
+    const numLights = colors.length;
+    const glowRange = {start: 0.25, end: 1};
+    const progressValue = currentTime.getTime() % GLOW_PERIOD;
+
+    return colors.map((color, lightIndex) => {
+      const offset = offsets?.[lightIndex] || (lightIndex / numLights);
+      // const progressValueOffset = (progressValue + ((lightIndex / numLights) * glowPeriod)) % glowPeriod;
+      const progressValueOffset = (progressValue + (offset * GLOW_PERIOD)) % GLOW_PERIOD;
+      // TODO: I think there are floating point problems causing lights to suddenly become bright for 1 frame before
+      // when reaching 0 brightness.
+      const progressValueSymmetric = Math.abs(progressValueOffset - (GLOW_PERIOD / 2)) * 2;
+      const progress = progressValueSymmetric / GLOW_PERIOD;
+      const glowValue = getGlowValue(progress);
+      // Maps glow value from [0, 1] to glowRange
+      const scaledGlowValue = glowRange.start * (1 - glowValue) + glowRange.end * (glowValue)
+
+      return {
+        color,
+        brightness: scaledGlowValue,
+      }
+    });
+  }
+
+  // TODO move
+  function getGlowValue(glowProgress: number) {
+    const ease = bezier(0.25, 0.1, 0.25, 0.1);
+    const easeOut = bezier(0.0, 0.0, 0.58, 1.0);
+
+    return ease(glowProgress);
+  }
 
   const MAX_WIDTH_PER_NUM_COPIES = 400;
   const LIGHT_GROUP_SIZE = 4;
@@ -40,35 +81,40 @@
     Orange,
     Red,
   ];
-  const whites = [
-    White,
-    White,
-    White,
-    White,
-  ];
+
+  // TODO: map to input
+  let glow = true;
 
   const numCopies = 1;
   let itemsPerRow: number;
   let boxSize: string;
 
-  let colors: Color[];
+  let lights: Light[];
   let lightSource: Color;
-  let lightRows: Color[][];
+  let lightRows: Light[][];
 
-  const partition: <T>(array: Array<T>, chunkSize: number) => Array<Array<T>> = <T,>(array: Array<T>, chunkSize: number) => {
-    const numChunks = Math.ceil(array.length / chunkSize);
-    return new Array(numChunks).fill(undefined).map((_, chunkIndex) => {
-        return array.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
-    });
-  };
-
-  const colorPool = pureColors;
+  const colorPool = repeatArray(christmasColors, 12);
+  const randomizedOffsets = colorPool.map(() => Math.random());
 
   $: boxSize = `${MAX_WIDTH_PER_NUM_COPIES / numCopies}px`;
   $: lightSource = scaleColor(temperatureToRGB(colorTemperature), brightness);
-  $: colors = colorPool;
-  $: lightRows = partition(colors, LIGHT_GROUP_SIZE);
-  $: itemsPerRow = colors.length;
+  $: lights = getLights(colorPool, glow, new Date(), randomizedOffsets);
+  $: lightRows = partition(lights, LIGHT_GROUP_SIZE);
+  $: itemsPerRow = lights.length;
+
+  const hasTimedEvents = glow;
+
+  if (hasTimedEvents) {
+    onMount(()=> {
+      const interval = setInterval(() => {
+        lights = getLights(colorPool, glow, new Date(), randomizedOffsets);
+      }, 1);
+
+      return () => {
+        clearInterval(interval);
+      }
+    });
+  }
 
 </script>
 
@@ -77,7 +123,7 @@
     {#each lightRows as lightRow}
       <div class='light_row' style:--boxSize={boxSize}>
         {#each lightRow as light}
-          <ColorBox lightSource={lightSource} color={light} filterStrength={filterStrength} --boxSize={boxSize}></ColorBox>
+          <ColorBox lightSource={lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} --boxSize={boxSize}></ColorBox>
         {/each}
       </div>
     {/each}
@@ -91,7 +137,6 @@
     flex-grow: 1;
     flex-shrink: 1;
     height: 100%;
-    max-height: 800px;
   }
   .light_rows {
     display: flex;

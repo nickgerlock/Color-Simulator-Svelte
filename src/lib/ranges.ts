@@ -21,6 +21,9 @@ export const BrightnessRange: RangeParameters = {
     {
       value: 2, label: "200%",
     },
+    {
+      value: 3, label: "300%",
+    },
   ],
 }
 

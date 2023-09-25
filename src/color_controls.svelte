@@ -18,6 +18,8 @@
 <style>
   .controls {
     margin: auto;
+    margin-bottom: 2em;
+    margin-top: 0px;
     font-size: larger;
   }
 </style>

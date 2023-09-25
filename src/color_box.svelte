@@ -1,14 +1,18 @@
 <script lang="ts">
   import type { Color } from './lib/color';
-  import { White, Orange } from './lib/colors'
+  import { scaleColor } from './lib/color'
   import { colorString, getBrightness, getLuminance } from './lib/color';
   import { getLightColors } from './lib/colored_light';
+  import bezier from 'bezier-easing';
 
   export let lightSource: Color;
   export let color: Color;
   export let filterStrength: number;
+  export let brightness: number | undefined;
 
-  $: ({ low, mid, high } = getLightColors(lightSource, color, filterStrength));
+  $: scaledLightSource = brightness ? scaleColor(lightSource, brightness) : lightSource;
+
+  $: ({ low, mid, high } = getLightColors(scaledLightSource, color, filterStrength));
   $: luminance = getBrightness(low);
   $: lowString = colorString(low);
   $: midString = colorString(mid);
@@ -28,13 +32,13 @@ style:--glow2={glow2}
 style:--glow3={glow3}
 style:--glowRadius={glowRadius}
 class="color_box">
-  <div class="glow">
-  <div class="layer layer_1">
-    <div class="layer layer_2">
-      <div class="layer layer_3">
+  <div class="layer_1 glow">
+    <div class="layer layer_1">
+      <div class="layer layer_2">
+        <div class="layer layer_3">
+        </div>
       </div>
     </div>
-  </div>
   </div>
 </div>
 
