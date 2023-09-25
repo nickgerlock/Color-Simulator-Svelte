@@ -58,7 +58,7 @@
     flex-grow: 0;
   }
   .content {
-    overflow: scroll;
+    overflow: visible;
     display: flex;
     flex-direction: column;
     /* flex-grow: 1; */
@@ -78,11 +78,4 @@
     flex-grow: 1;
   }
 
-  hr {
-    border-color: var(--border-color);
-    border-width: 0.5px;
-    width: 200vw;
-    position: relative;
-    left: -50vw;
-  }
 </style>

@@ -19,7 +19,15 @@
   $: glowRadius = `${Math.floor(luminance * 160)}px`
 </script>
 
-<div style="--low:{lowString}; --mid:{midString}; --high:{highString}; --glow1:{glow1}; --glow2:{glow2}; --glow3:{glow3}; --glowRadius:{glowRadius}" class="color_box">
+<div 
+style:--low={lowString}
+style:--mid={midString}
+style:--high={highString}
+style:--glow1={glow1}
+style:--glow2={glow2}
+style:--glow3={glow3}
+style:--glowRadius={glowRadius}
+class="color_box">
   <div class="glow">
   <div class="layer layer_1">
     <div class="layer layer_2">

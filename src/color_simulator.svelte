@@ -62,14 +62,7 @@
     });
   };
 
-  const colorPool = [
-    ...christmasColors,
-    ...christmasColors,
-    ...christmasColors,
-    ...christmasColors,
-    ...christmasColors,
-    ...christmasColors,
-  ]
+  const colorPool = pureColors;
 
   $: boxSize = `${MAX_WIDTH_PER_NUM_COPIES / numCopies}px`;
   $: lightSource = scaleColor(temperatureToRGB(colorTemperature), brightness);
@@ -80,9 +73,9 @@
 </script>
 
 <div class="color_simulator">
-  <div class='light_rows' style='--itemsPerRow:{itemsPerRow}'>
+  <div class='light_rows' style:--itemsPerRow={itemsPerRow}>
     {#each lightRows as lightRow}
-      <div class='light_row' style="--boxSize:{boxSize}">
+      <div class='light_row' style:--boxSize={boxSize}>
         {#each lightRow as light}
           <ColorBox lightSource={lightSource} color={light} filterStrength={filterStrength} --boxSize={boxSize}></ColorBox>
         {/each}
@@ -101,8 +94,6 @@
     max-height: 800px;
   }
   .light_rows {
-    max-height: 100%;
-    overflow: scroll;
     display: flex;
     justify-content: space-around;
     flex-direction: row;
