@@ -152,6 +152,7 @@
     row-gap: 2%;
   }
   .light_row {
+    max-width: 800px;
     overflow: visible;
     flex-grow: 1;
     flex-shrink: 1;
