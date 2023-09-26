@@ -9,6 +9,7 @@
   export let color: Color;
   export let filterStrength: number;
   export let brightness: number | undefined;
+  export let bloom: number = 0;
 
   $: scaledLightSource = brightness ? scaleColor(lightSource, brightness) : lightSource;
 
@@ -17,10 +18,10 @@
   $: lowString = colorString(low);
   $: midString = colorString(mid);
   $: highString = colorString(high);
-  $: glow1 = colorString(low, luminance * 0.25);
+  $: glow1 = colorString(low, luminance * 0.5);
   $: glow2 = colorString(mid, luminance * 0.1);
   $: glow3 = colorString(high, luminance * 0.1);
-  $: glowRadius = `${Math.floor(luminance * 160)}px`
+  $: glowRadius = `${bloom * luminance * 160}px`
 </script>
 
 <div 

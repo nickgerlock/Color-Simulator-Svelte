@@ -48,6 +48,11 @@ const K_10000: Color = {
   green: 218,
   blue: 255,
 } as const;
+const K_12000: Color = {
+  red: 195,
+  green: 209,
+  blue: 255,
+} as const;
 
 const ColorTemps = [
   [1000, K_1000],
@@ -57,6 +62,7 @@ const ColorTemps = [
   [5500, K_5500],
   [7000, K_7000],
   [10000, K_10000],
+  [12000, K_12000],
 ] as const;
 
 const MinColorTemp = ColorTemps[0];

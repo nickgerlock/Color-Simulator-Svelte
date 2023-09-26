@@ -3,6 +3,8 @@
   export let brightness: number = 0.5;
   export let colorTemperature: number = 4000;
   export let filterStrength: number = 1.0;
+  export let bloom: number = 1.0;
+  export let glow: boolean = false;
 
   // TODO move definition. probably change it
   type Light = {color: Color, brightness?: number};
@@ -29,39 +31,35 @@
   } from './lib/colors';
   import { partition, repeatArray, repeat } from './lib/utils';
 
-  function getLights(colors: Color[], glow: boolean, currentTime: Date, offsets?: number[]): Light[] {
-    const GLOW_PERIOD = 8_000;
+  function getLights(colors: Color[], glow: boolean, seed: number, offsets?: number[]): Light[] {
+    return colors.map((color, index) => {
+      const progressValue = (seed % GLOW_PERIOD);
+      const offset = (offsets?.[index] || Math.floor((index / colors.length) * GLOW_PERIOD));
+      const progressValueOffset = (progressValue + offset) % GLOW_PERIOD;
 
-    const numLights = colors.length;
-    const glowRange = {start: 0.25, end: 1};
-    const progressValue = currentTime.getTime() % GLOW_PERIOD;
-
-    return colors.map((color, lightIndex) => {
-      const offset = offsets?.[lightIndex] || (lightIndex / numLights);
-      // const progressValueOffset = (progressValue + ((lightIndex / numLights) * glowPeriod)) % glowPeriod;
-      const progressValueOffset = (progressValue + (offset * GLOW_PERIOD)) % GLOW_PERIOD;
-      // TODO: I think there are floating point problems causing lights to suddenly become bright for 1 frame before
-      // when reaching 0 brightness.
-      const progressValueSymmetric = Math.abs(progressValueOffset - (GLOW_PERIOD / 2)) * 2;
-      const progress = progressValueSymmetric / GLOW_PERIOD;
-      const glowValue = getGlowValue(progress);
-      // Maps glow value from [0, 1] to glowRange
-      const scaledGlowValue = glowRange.start * (1 - glowValue) + glowRange.end * (glowValue)
-
+      const glowValue = precomputedGlowValues.get(progressValueOffset);
       return {
         color,
-        brightness: scaledGlowValue,
-      }
+        brightness: glow ? glowValue : 1.0,
+      };
     });
   }
 
-  // TODO move
-  function getGlowValue(glowProgress: number) {
-    const ease = bezier(0.25, 0.1, 0.25, 0.1);
-    const easeOut = bezier(0.0, 0.0, 0.58, 1.0);
-
-    return ease(glowProgress);
+  function computeGlowValue(seed: number) {
+    const progressValue = (seed % GLOW_PERIOD) / GLOW_PERIOD;
+    const symmetricalizedProgressValue = Math.abs(progressValue - 0.5) * 2.0;
+    const rawGlowValue = ease(symmetricalizedProgressValue);
+    const scaledGlowValue = GLOW_RANGE.start * (1 - rawGlowValue) + GLOW_RANGE.end * (rawGlowValue)
+    
+    return scaledGlowValue;
   }
+
+  function ease(number: number) {
+    return bezier(0.25, 0.1, 0.25, 0.1)(number);
+  }
+
+  const GLOW_PERIOD = 8_000;
+  const GLOW_RANGE = {start: 0.25, end: 1.0};
 
   const MAX_WIDTH_PER_NUM_COPIES = 400;
   const LIGHT_GROUP_SIZE = 4;
@@ -82,9 +80,6 @@
     Red,
   ];
 
-  // TODO: map to input
-  let glow = true;
-
   const numCopies = 1;
   let itemsPerRow: number;
   let boxSize: string;
@@ -93,28 +88,31 @@
   let lightSource: Color;
   let lightRows: Light[][];
 
-  const colorPool = repeatArray(christmasColors, 12);
-  const randomizedOffsets = colorPool.map(() => Math.random());
+  // const colorPool = repeatArray(christmasColors, 12);
+  const colorPool = repeatArray(christmasColors, 4);
+  const randomizedOffsets = colorPool.map(() => Math.floor(Math.random() * GLOW_PERIOD));
+  // Computed glow values for [0, ... , GLOW_PERIOD]
+  const precomputedGlowValues: Map<number, number> = new Map(new Array(GLOW_PERIOD).fill(undefined).map((item, indexAsSeed) => {
+    return [indexAsSeed, computeGlowValue(indexAsSeed)];
+  }));
 
   $: boxSize = `${MAX_WIDTH_PER_NUM_COPIES / numCopies}px`;
   $: lightSource = scaleColor(temperatureToRGB(colorTemperature), brightness);
-  $: lights = getLights(colorPool, glow, new Date(), randomizedOffsets);
+  $: lights = getLights(colorPool, glow, new Date().getTime(), randomizedOffsets);
   $: lightRows = partition(lights, LIGHT_GROUP_SIZE);
   $: itemsPerRow = lights.length;
 
-  const hasTimedEvents = glow;
-
-  if (hasTimedEvents) {
-    onMount(()=> {
-      const interval = setInterval(() => {
-        lights = getLights(colorPool, glow, new Date(), randomizedOffsets);
-      }, 1);
-
-      return () => {
-        clearInterval(interval);
+  onMount(()=> {
+    const interval = setInterval(() => {
+      if (glow) {
+        lights = getLights(colorPool, glow, new Date().getTime(), randomizedOffsets);
       }
-    });
-  }
+    }, 8);
+
+    return () => {
+      clearInterval(interval);
+    }
+  });
 
 </script>
 
@@ -123,7 +121,7 @@
     {#each lightRows as lightRow}
       <div class='light_row' style:--boxSize={boxSize}>
         {#each lightRow as light}
-          <ColorBox lightSource={lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} --boxSize={boxSize}></ColorBox>
+          <ColorBox lightSource={lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} bloom={bloom} --boxSize={boxSize}></ColorBox>
         {/each}
       </div>
     {/each}

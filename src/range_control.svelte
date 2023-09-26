@@ -22,7 +22,7 @@
 <style>
   .control {
     margin: auto;
-    margin-top: 1em;
+    /* margin-top: 1em; */
     width: min(max(200px, 60vw), 500px);
   }
 
@@ -47,6 +47,12 @@
 
   option {
     padding: 0;
+  }
+
+  @media only screen and (max-width: 480px) {
+    datalist {
+      display: none;
+    }
   }
 
 </style>

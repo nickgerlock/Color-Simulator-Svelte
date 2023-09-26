@@ -1,11 +1,13 @@
 <script lang="ts">
   import ColorControls from './color_controls.svelte';
   import ColorSimulator from './color_simulator.svelte';
-  import { BrightnessRange, ColorTemperatureRange, FilterStrengthRange } from './lib/ranges';
+  import { BloomRange, BrightnessRange, ColorTemperatureRange, FilterStrengthRange } from './lib/ranges';
 
   let brightness: number = BrightnessRange.default;
+  let bloom: number = BloomRange.default;
   let colorTemperature: number = ColorTemperatureRange.default;
   let filterStrength: number = FilterStrengthRange.default;
+  let glow: boolean = false;
 </script>
 
 <div class="page">
@@ -15,14 +17,13 @@
 
   <div class="content">
     <div class="color_simulator_container">
-      <ColorSimulator brightness={brightness} colorTemperature={colorTemperature} filterStrength={filterStrength}></ColorSimulator>
+      <ColorSimulator brightness={brightness} colorTemperature={colorTemperature} filterStrength={filterStrength} bloom={bloom} glow={glow}></ColorSimulator>
     </div>
 
     <div class="color_controls_container">
-      <ColorControls bind:brightness={brightness} bind:colorTemperature={colorTemperature} bind:filterStrength={filterStrength}></ColorControls>
+      <ColorControls bind:brightness={brightness} bind:colorTemperature={colorTemperature} bind:filterStrength={filterStrength} bind:bloom={bloom} bind:glow={glow}></ColorControls>
     </div>
   </div>
-
 </div>
 
 <style>
@@ -57,29 +58,32 @@
   }
   .header {
     box-sizing: border-box;
-    padding: 8px;
-    margin: 8px;
+    padding: 0px 8px 0px 8px;
+    margin: 0px 8px 0px 8px;
     flex-grow: 0;
+    flex-shrink: 1;
     flex-basis: 10%;
     max-height: 10%;
+  }
+  .header h1 {
+    margin-bottom: 0px;
   }
   .content {
     box-sizing: border-box;
     overflow: visible;
     display: flex;
     flex-direction: column;
-    /* flex-grow: 1; */
     flex-basis: 90%;
     max-height: 90%;
+    gap: 1%;
   }
 
   .color_simulator_container {
     overflow: scroll;
-    padding-top: 4vh;
     padding-bottom: 4vh;
     box-sizing: border-box;
-    flex-basis: 70%;
-    max-height: 70%;
+    flex-basis: 60%;
+    max-height: 60%;
   }
 
   .color_controls_container {
