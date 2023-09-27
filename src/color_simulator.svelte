@@ -6,8 +6,14 @@
   export let bloom: number = 1.0;
   export let glow: boolean = false;
 
+  export let coloredDiode: boolean = false;
+
   // TODO move definition. probably change it
-  type Light = {color: Color, brightness?: number};
+  type Light = {
+    color: Color,
+    brightness: number,
+    brightnessAdjustment?: number,
+  };
 
   import { onMount } from 'svelte';
   import bezier from 'bezier-easing';
@@ -31,7 +37,7 @@
   } from './lib/colors';
   import { partition, repeatArray, repeat } from './lib/utils';
 
-  function getLights(colors: Color[], glow: boolean, seed: number, offsets?: number[]): Light[] {
+  function getLights(colors: Color[], brightness: number, glow: boolean, seed: number, offsets?: number[]): Light[] {
     return colors.map((color, index) => {
       const progressValue = (seed % GLOW_PERIOD);
       const offset = (offsets?.[index] || Math.floor((index / colors.length) * GLOW_PERIOD));
@@ -40,7 +46,8 @@
       const glowValue = precomputedGlowValues.get(progressValueOffset);
       return {
         color,
-        brightness: glow ? glowValue : 1.0,
+        brightness,
+        brightnessAdjustment: glow ? glowValue : 1.0,
       };
     });
   }
@@ -62,7 +69,7 @@
   const GLOW_RANGE = {start: 0.25, end: 1.0};
 
   const MAX_WIDTH_PER_NUM_COPIES = 400;
-  const LIGHT_GROUP_SIZE = 4;
+  const NUM_LIGHTS_PER_ROW = 4;
   const pureColors = [
     White,
     Black,
@@ -80,13 +87,9 @@
     Red,
   ];
 
-  const numCopies = 1;
-  let itemsPerRow: number;
-  let boxSize: string;
-
   let lights: Light[];
   let lightSource: Color;
-  let lightRows: Light[][];
+  // let lightRows: Light[][];
 
   // const colorPool = repeatArray(christmasColors, 12);
   const colorPool = repeatArray(christmasColors, 4);
@@ -96,16 +99,17 @@
     return [indexAsSeed, computeGlowValue(indexAsSeed)];
   }));
 
-  $: boxSize = `${MAX_WIDTH_PER_NUM_COPIES / numCopies}px`;
+  const numLights = colorPool.length;
+  const numRows = numLights / NUM_LIGHTS_PER_ROW;
+  const aspectRatio = NUM_LIGHTS_PER_ROW / numRows;
+
   $: lightSource = scaleColor(temperatureToRGB(colorTemperature), brightness);
-  $: lights = getLights(colorPool, glow, new Date().getTime(), randomizedOffsets);
-  $: lightRows = partition(lights, LIGHT_GROUP_SIZE);
-  $: itemsPerRow = lights.length;
+  $: lights = getLights(colorPool, brightness, glow, new Date().getTime(), randomizedOffsets);
 
   onMount(()=> {
     const interval = setInterval(() => {
       if (glow) {
-        lights = getLights(colorPool, glow, new Date().getTime(), randomizedOffsets);
+        lights = getLights(colorPool, brightness, glow, new Date().getTime(), randomizedOffsets);
       }
     }, 8);
 
@@ -117,13 +121,9 @@
 </script>
 
 <div class="color_simulator">
-  <div class='light_rows' style:--itemsPerRow={itemsPerRow}>
-    {#each lightRows as lightRow}
-      <div class='light_row' style:--boxSize={boxSize}>
-        {#each lightRow as light}
-          <ColorBox lightSource={lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} bloom={bloom} --boxSize={boxSize}></ColorBox>
-        {/each}
-      </div>
+  <div class='lights' style:--lightsPerRow={NUM_LIGHTS_PER_ROW} style:--aspectRatio={aspectRatio}>
+    {#each lights as light}
+      <ColorBox lightSource={lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} brightnessAdjustment={light.brightnessAdjustment} bloom={bloom} coloredDiode={coloredDiode}></ColorBox>
     {/each}
   </div>
 </div>
@@ -131,37 +131,27 @@
 <style>
   .color_simulator {
     animation: fadein 0.4s;
-    display: flex;
+    display: grid;
     flex-grow: 1;
     flex-shrink: 1;
-    height: 100%;
   }
-  .light_rows {
-    display: flex;
-    justify-content: space-around;
-    flex-direction: row;
-    flex-wrap: wrap;
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-basis: 300px;
+  .lights {
+    --maxHeight: 60vh; /* TODO: this is arbitrary */
+    --maxWidthFromHeight: calc((var(--maxHeight) * var(--aspectRatio)));
+    --maxWidth: min(80vw, var(--maxWidthFromHeight));
     margin: auto;
-    padding-left: 2em;
-    padding-right: 2em;
-    /* max-width: 80vw; */
-    gap: 2%;
-    row-gap: 2%;
-  }
-  .light_row {
-    max-width: 800px;
-    overflow: visible;
-    flex-grow: 1;
-    flex-shrink: 1;
-    flex-direction: row;
-    display: flex;
-    gap: 4%;
-    flex-basis: var(--boxSize, 200px);
-    /* min-width: 250px; */
-    padding-bottom: 4%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    width: var(--maxWidth);
+
+    display: grid;
+    
+    grid-auto-flow: row;
+    grid-row-gap: 1.5vw;
+    grid-column-gap: 1.5vw;
+    grid-template-columns: repeat(var(--lightsPerRow), minmax(0, 1fr));
+    grid-template-rows: repeat(auto, 10px);
+    /* grid-auto-rows: minmax(100px, auto); */
   }
   @keyframes fadein {
       from {

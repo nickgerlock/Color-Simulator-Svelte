@@ -22,8 +22,8 @@
 <style>
   .control {
     margin: auto;
-    /* margin-top: 1em; */
-    width: min(max(200px, 60vw), 500px);
+    width: 200px;
+    /* width: min(max(100px, 60vw), 500px); */
   }
 
   label {

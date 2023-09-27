@@ -49,12 +49,9 @@
   }
 
   .page {
-    height: 100%;
+    /* height: 100%; */
     /* margin: 8px;
     padding: 8px; */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
   }
   .header {
     box-sizing: border-box;
@@ -65,32 +62,28 @@
     flex-basis: 10%;
     max-height: 10%;
   }
-  .header h1 {
-    margin-bottom: 0px;
-  }
   .content {
     box-sizing: border-box;
     overflow: visible;
-    display: flex;
-    flex-direction: column;
-    flex-basis: 90%;
-    max-height: 90%;
+    display: grid;
+    height: 90vh;
+    width: 95vw;
+    grid-template-rows: 10fr 1fr;
     gap: 1%;
   }
 
   .color_simulator_container {
+    height: 1fr;
     overflow: scroll;
     padding-bottom: 4vh;
     box-sizing: border-box;
-    flex-basis: 60%;
-    max-height: 60%;
+    display: flex;
+    /* flex-basis: 60%;
+    max-height: 60%; */
   }
 
   .color_controls_container {
-    display: flex;
-    align-items: flex-end;
-    flex-basis: 30%;
-    flex-shrink: 1;
+    height: 10fr;
   }
 
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Color } from './lib/color';
-  import { scaleColor } from './lib/color'
+  import { scaleColor, setBrightness } from './lib/color'
   import { colorString, getBrightness, getLuminance } from './lib/color';
   import { getLightColors } from './lib/colored_light';
   import bezier from 'bezier-easing';
@@ -8,20 +8,27 @@
   export let lightSource: Color;
   export let color: Color;
   export let filterStrength: number;
-  export let brightness: number | undefined;
+  export let brightness: number;
+  export let brightnessAdjustment: number | undefined;
   export let bloom: number = 0;
+  export let coloredDiode: boolean = false;
 
-  $: scaledLightSource = brightness ? scaleColor(lightSource, brightness) : lightSource;
+  $: lightSource = coloredDiode ? setBrightness(color, 0.5) : lightSource;
+  $: scaledLightSource = brightness ? scaleColor(lightSource, brightness * (brightnessAdjustment || 1.0)) : lightSource;
+
+  console.log(lightSource)
+  console.log(scaledLightSource)
 
   $: ({ low, mid, high } = getLightColors(scaledLightSource, color, filterStrength));
   $: luminance = getBrightness(low);
   $: lowString = colorString(low);
   $: midString = colorString(mid);
   $: highString = colorString(high);
-  $: glow1 = colorString(low, luminance * 0.5);
+  $: glow1 = colorString(low, luminance * 0.25);
   $: glow2 = colorString(mid, luminance * 0.1);
   $: glow3 = colorString(high, luminance * 0.1);
-  $: glowRadius = `${bloom * luminance * 160}px`
+  // $: glowRadius = `${bloom * luminance * 10}em`
+  $: glowRadius = `${bloom * luminance * 11}vw`
 </script>
 
 <div 
@@ -45,11 +52,15 @@ class="color_box">
 
 <style>
   .color_box {
+    grid-column-start: auto;
+    grid-column-end: auto;
     display: block;
     aspect-ratio: 1;
-    flex-basis: 100px;
-    flex-grow: 1;
-    flex-shrink: 1;
+    width: 100%;
+    height: 100%;
+    /* flex-basis: 100px; */
+    /* flex-grow: 1; */
+    /* flex-shrink: 1; */
   }
   .color_box .layer {
     margin: auto;
