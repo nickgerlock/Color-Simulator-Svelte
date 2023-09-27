@@ -31,7 +31,7 @@
 <style>
   .controls {
     margin: auto;
-    margin-bottom: 4em;
+    margin-bottom: 6em;
     margin-top: 0px;
     display: flex;
     flex-direction: column;

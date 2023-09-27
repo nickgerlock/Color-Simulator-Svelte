@@ -102,6 +102,7 @@
   const numLights = colorPool.length;
   const numRows = numLights / NUM_LIGHTS_PER_ROW;
   const aspectRatio = NUM_LIGHTS_PER_ROW / numRows;
+  const inverseAspectRatio = numRows / NUM_LIGHTS_PER_ROW;
 
   $: lightSource = scaleColor(temperatureToRGB(colorTemperature), brightness);
   $: lights = getLights(colorPool, brightness, glow, new Date().getTime(), randomizedOffsets);
@@ -121,7 +122,7 @@
 </script>
 
 <div class="color_simulator">
-  <div class='lights' style:--lightsPerRow={NUM_LIGHTS_PER_ROW} style:--aspectRatio={aspectRatio}>
+  <div class='lights' style:--lightsPerRow={NUM_LIGHTS_PER_ROW} style:--aspectRatio={aspectRatio} style:--inverseAspectRatio={inverseAspectRatio}>
     {#each lights as light}
       <ColorBox lightSource={lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} brightnessAdjustment={light.brightnessAdjustment} bloom={bloom} coloredDiode={coloredDiode}></ColorBox>
     {/each}
@@ -134,21 +135,25 @@
     display: grid;
     flex-grow: 1;
     flex-shrink: 1;
+    overflow: visible;
   }
   .lights {
     --maxHeight: 60vh; /* TODO: this is arbitrary */
     --maxWidthFromHeight: calc((var(--maxHeight) * var(--aspectRatio)));
+    --maxHeightFromWidth: calc((var(--maxWidth) * var(--inverseAspectRatio)));
     --maxWidth: min(80vw, var(--maxWidthFromHeight));
+    overflow: visible;
     margin: auto;
     margin-top: 0px;
     margin-bottom: 0px;
     width: var(--maxWidth);
+    max-height: var(--maxHeightFromWidth);
 
     display: grid;
     
     grid-auto-flow: row;
-    grid-row-gap: 1.5vw;
-    grid-column-gap: 1.5vw;
+    grid-row-gap: max(1.5vw, 10px);
+    grid-column-gap: max(1.5vw, 10px);
     grid-template-columns: repeat(var(--lightsPerRow), minmax(0, 1fr));
     grid-template-rows: repeat(auto, 10px);
     /* grid-auto-rows: minmax(100px, auto); */

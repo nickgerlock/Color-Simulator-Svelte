@@ -65,17 +65,15 @@
   .content {
     box-sizing: border-box;
     overflow: visible;
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     height: 90vh;
-    width: 95vw;
-    grid-template-rows: 10fr 1fr;
     gap: 1%;
   }
 
   .color_simulator_container {
-    height: 1fr;
-    overflow: scroll;
-    padding-bottom: 4vh;
+    overflow: visible;
     box-sizing: border-box;
     display: flex;
     /* flex-basis: 60%;
@@ -85,5 +83,6 @@
   .color_controls_container {
     height: 10fr;
   }
+
 
 </style>
