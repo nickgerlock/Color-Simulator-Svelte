@@ -16,9 +16,6 @@
   $: lightSource = coloredDiode ? setBrightness(color, 0.5) : lightSource;
   $: scaledLightSource = brightness ? scaleColor(lightSource, brightness * (brightnessAdjustment || 1.0)) : lightSource;
 
-  console.log(lightSource)
-  console.log(scaledLightSource)
-
   $: ({ low, mid, high } = getLightColors(scaledLightSource, color, filterStrength));
   $: luminance = getBrightness(low);
   $: lowString = colorString(low);

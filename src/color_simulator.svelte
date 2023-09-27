@@ -87,6 +87,8 @@
     Red,
   ];
 
+  console.log(pureColors)
+
   let lights: Light[];
   let lightSource: Color;
   // let lightRows: Light[][];
@@ -106,6 +108,8 @@
 
   $: lightSource = scaleColor(temperatureToRGB(colorTemperature), brightness);
   $: lights = getLights(colorPool, brightness, glow, new Date().getTime(), randomizedOffsets);
+
+  $: console.log(lightSource)
 
   onMount(()=> {
     const interval = setInterval(() => {

@@ -7,8 +7,6 @@
   export let filterStrength: number = FilterStrengthRange.default;
   export let bloom: number = BloomRange.default;
   export let glow: boolean = false;
-
-  $: console.log(glow);
 </script>
 
 <div class="controls">

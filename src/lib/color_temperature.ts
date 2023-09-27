@@ -1,4 +1,4 @@
-import { mix } from './color';
+import { color, mix } from './color';
 import type { Color } from './color';
 export type ColorTemp = [number, Color];
 
@@ -12,57 +12,15 @@ export function temperatureToRGB(kelvin: number): Color {
   return mix(leftSide[1], rightSide[1], 1 - progressFromLeftToRight);
 }
 
-// TODO: use color function to make these shorter. define inline with list.
-const K_1000: Color = {
-  red: 255,
-  green: 56,
-  blue: 0,
-} as const;
-const K_2000: Color = {
-  red: 255,
-  green: 147,
-  blue: 44
-} as const;
-const K_3300: Color = {
-  red: 255,
-  green: 190,
-  blue: 126,
-} as const;
-const K_4000: Color = {
-  red: 255,
-  green: 209,
-  blue: 163,
-} as const;
-const K_5500: Color = {
- red: 255,
- green: 236,
- blue: 224,
-} as const;
-const K_7000: Color = {
-  red: 245,
-  green: 243,
-  blue: 255,
-} as const;
-const K_10000: Color = {
-  red: 207,
-  green: 218,
-  blue: 255,
-} as const;
-const K_12000: Color = {
-  red: 195,
-  green: 209,
-  blue: 255,
-} as const;
-
 const ColorTemps = [
-  [1000, K_1000],
-  [2000, K_2000],
-  [3300, K_3300],
-  [4000, K_4000],
-  [5500, K_5500],
-  [7000, K_7000],
-  [10000, K_10000],
-  [12000, K_12000],
+  [1000, color(1.0, 0.2196078431372549, 0)],
+  [2000, color(1.0, 0.5764705882352941, 0.17254901960784313)],
+  [3300, color(1.0, 0.7450980392156863, 0.49411764705882355)],
+  [4000, color(1.0, 0.8196078431372549, 0.6392156862745098)],
+  [5500, color(1.0, 0.9254901960784314, 0.8784313725490196)],
+  [7000, color(0.9607843137254902, 0.9529411764705882, 1.0)],
+  [10000, color(0.8117647058823529, 0.8549019607843137, 1.0)],
+  [12000, color(0.7647058823529411, 0.8196078431372549, 1.0)],
 ] as const;
 
 const MinColorTemp = ColorTemps[0];

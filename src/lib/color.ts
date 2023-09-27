@@ -1,4 +1,4 @@
-const MAXIMUM_COLOR_VALUE = 255;
+const MAXIMUM_COLOR_VALUE = 1.0;
 
 // TODO: brand type of color number
 export type Color = {
@@ -17,9 +17,9 @@ export function color(red: number, green: number, blue: number): Color {
 
 export function scaleColor(color: Color, scalar: number = 1.0) {
   return {
-    red: Math.floor(color.red * scalar),
-    green: Math.floor(color.green * scalar),
-    blue: Math.floor(color.blue * scalar),
+    red: color.red * scalar,
+    green: color.green * scalar,
+    blue: color.blue * scalar,
   };
 }
 
@@ -58,7 +58,7 @@ export function filter(input: Color, filter: Color, filterStrength: number = 0.5
 }
 
 export function colorString(color: Color, opacity: number = 1): string {
-  return `rgb(${color.red} ${color.green} ${color.blue} / ${opacity})`;
+  return `srgb(${color.red} ${color.green} ${color.blue} / ${opacity})`;
 }
 
 
