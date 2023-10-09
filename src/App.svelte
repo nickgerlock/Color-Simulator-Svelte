@@ -1,13 +1,15 @@
 <script lang="ts">
   import ColorControls from './color_controls.svelte';
   import ColorSimulator from './color_simulator.svelte';
-  import { BloomRange, BrightnessRange, ColorTemperatureRange, FilterStrengthRange } from './lib/ranges';
+  import { BloomRange, BrightnessRange, ColorTemperatureRange, FilterStrengthRange, GlowPeriodRange } from './lib/ranges';
 
   let brightness: number = BrightnessRange.default;
   let bloom: number = BloomRange.default;
   let colorTemperature: number = ColorTemperatureRange.default;
   let filterStrength: number = FilterStrengthRange.default;
-  let glow: boolean = false;
+  let glow: boolean = true;
+  let glowPeriod: number = GlowPeriodRange.default;
+  let ledMode: boolean = false;
 </script>
 
 <div class="page">
@@ -17,11 +19,11 @@
 
   <div class="content">
     <div class="color_simulator_container">
-      <ColorSimulator brightness={brightness} colorTemperature={colorTemperature} filterStrength={filterStrength} bloom={bloom} glow={glow}></ColorSimulator>
+      <ColorSimulator brightness={brightness} colorTemperature={colorTemperature} filterStrength={filterStrength} bloom={bloom} glow={glow} glowPeriod={glowPeriod} ledMode={ledMode}></ColorSimulator>
     </div>
 
     <div class="color_controls_container">
-      <ColorControls bind:brightness={brightness} bind:colorTemperature={colorTemperature} bind:filterStrength={filterStrength} bind:bloom={bloom} bind:glow={glow}></ColorControls>
+      <ColorControls bind:brightness={brightness} bind:colorTemperature={colorTemperature} bind:filterStrength={filterStrength} bind:bloom={bloom} bind:glow={glow} bind:glowPeriod={glowPeriod} bind:ledMode={ledMode}></ColorControls>
     </div>
   </div>
 </div>
@@ -67,9 +69,9 @@
     overflow: visible;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    height: 90vh;
-    gap: 1%;
+    flex-wrap: wrap;
+    height: 85vh;
+    gap: 20px;
   }
 
   .color_simulator_container {
@@ -78,11 +80,15 @@
     display: flex;
     /* flex-basis: 60%;
     max-height: 60%; */
+    flex-shrink: 1;
+    flex-grow: 1;
   }
 
   .color_controls_container {
-    height: 10fr;
+    margin-bottom: 1em;
+    box-sizing: border-box;
+    flex-shrink: 1;
+    flex-grow: 1;
   }
-
 
 </style>

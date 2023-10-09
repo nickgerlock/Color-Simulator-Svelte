@@ -4,25 +4,28 @@
   export let colorTemperature: number = 4000;
   export let filterStrength: number = 1.0;
   export let bloom: number = 1.0;
-  export let glow: boolean = false;
 
-  export let coloredDiode: boolean = false;
+  export let glow: boolean = false;
+  export let glowPeriod: number = 8000;
+  export let glowRange: {start: number, end: number} = {start: 0.25, end: 1.0};
+
+  export let ledMode: boolean = false;
 
   // TODO move definition. probably change it
   type Light = {
     color: Color,
+    lightSource: Color,
     brightness: number,
-    brightnessAdjustment?: number,
+    filterStrength: number,
   };
 
   import { onMount } from 'svelte';
-  import bezier from 'bezier-easing';
-  import shuffleArray from 'shuffle-array'
+  import { Incandescent, getColorFromTemperatureVariantLightSource, tempatureVariantLightSource } from './lib/color_temperature';
 
-  import ColorBox from './color_box.svelte';
+  import ColoredLight from './colored_light.svelte';
   import type { Color } from './lib/color';
-  import { scaleColor, mix, color } from './lib/color';
-  import { temperatureToRGB } from './lib/color_temperature';
+  import { scale, mix, color } from './lib/color';
+  import { getColorByTemperature, getColorByTemperatureWithBrightness } from './lib/color_temperature';
   import {
     White,
     Black,
@@ -33,43 +36,45 @@
     Magenta,
     Cyan,
     Orange,
-    Azure
+    Azure,
+    LedOrange,
   } from './lib/colors';
   import { partition, repeatArray, repeat } from './lib/utils';
+  import { ease, easeOut } from './lib/easing';
 
-  function getLights(colors: Color[], brightness: number, glow: boolean, seed: number, offsets?: number[]): Light[] {
+  function getLights(colors: Color[], lightSource: Color, brightness: number, filterStrength: number, glow: boolean, seed: number, offsets?: number[], ledMode=false, glowPeriod:number = 8000): Light[] {
     return colors.map((color, index) => {
-      const progressValue = (seed % GLOW_PERIOD);
-      const offset = (offsets?.[index] || Math.floor((index / colors.length) * GLOW_PERIOD));
-      const progressValueOffset = (progressValue + offset) % GLOW_PERIOD;
+      lightSource = ledMode ? color : lightSource;
+      let glowValue: number = 1.0;
+      if (glow) {
+        const progressValue = (seed % glowPeriod);
+        const offset = (offsets?.[index] || Math.floor((index / colors.length) * glowPeriod));
+        const progressValueOffset = (progressValue + offset) % glowPeriod;
 
-      const glowValue = precomputedGlowValues.get(progressValueOffset);
+        glowValue = precomputedGlowValues.get(progressValueOffset) as number;
+      }
+
       return {
         color,
-        brightness,
-        brightnessAdjustment: glow ? glowValue : 1.0,
+        lightSource,
+        filterStrength,
+        brightness: brightness * (glowValue ?? 1.0),
       };
     });
   }
 
-  function computeGlowValue(seed: number) {
-    const progressValue = (seed % GLOW_PERIOD) / GLOW_PERIOD;
+  function computeGlowValue(seed: number, glowPeriod: number) {
+    const progressValue = (seed % glowPeriod) / glowPeriod;
     const symmetricalizedProgressValue = Math.abs(progressValue - 0.5) * 2.0;
-    const rawGlowValue = ease(symmetricalizedProgressValue);
-    const scaledGlowValue = GLOW_RANGE.start * (1 - rawGlowValue) + GLOW_RANGE.end * (rawGlowValue)
+    const rawGlowValue = symmetricalizedProgressValue;
+    const scaledGlowValue = glowRange.start * (1 - rawGlowValue) + glowRange.end * (rawGlowValue)
     
     return scaledGlowValue;
   }
 
-  function ease(number: number) {
-    return bezier(0.25, 0.1, 0.25, 0.1)(number);
-  }
-
-  const GLOW_PERIOD = 8_000;
-  const GLOW_RANGE = {start: 0.25, end: 1.0};
-
   const MAX_WIDTH_PER_NUM_COPIES = 400;
   const NUM_LIGHTS_PER_ROW = 4;
+  const BRIGHTNESS_MULTIPLIER = 1.5;
   const pureColors = [
     White,
     Black,
@@ -81,24 +86,24 @@
     Cyan,
   ];
   const christmasColors = [
+    // mix(Blue, Azure, 0.75),
     Blue,
     Green,
+    // ledMode ? LedOrange: Orange,
     Orange,
     Red,
   ];
-
-  console.log(pureColors)
 
   let lights: Light[];
   let lightSource: Color;
   // let lightRows: Light[][];
 
-  // const colorPool = repeatArray(christmasColors, 12);
   const colorPool = repeatArray(christmasColors, 4);
-  const randomizedOffsets = colorPool.map(() => Math.floor(Math.random() * GLOW_PERIOD));
   // Computed glow values for [0, ... , GLOW_PERIOD]
-  const precomputedGlowValues: Map<number, number> = new Map(new Array(GLOW_PERIOD).fill(undefined).map((item, indexAsSeed) => {
-    return [indexAsSeed, computeGlowValue(indexAsSeed)];
+  let precomputedGlowValues: Map<number, number>;
+  // TODO: should probably change this to a random walk.
+  $: precomputedGlowValues = new Map(new Array(glowPeriod).fill(undefined).map((item, indexAsSeed) => {
+    return [indexAsSeed, computeGlowValue(indexAsSeed, glowPeriod)];
   }));
 
   const numLights = colorPool.length;
@@ -106,15 +111,16 @@
   const aspectRatio = NUM_LIGHTS_PER_ROW / numRows;
   const inverseAspectRatio = numRows / NUM_LIGHTS_PER_ROW;
 
-  $: lightSource = scaleColor(temperatureToRGB(colorTemperature), brightness);
-  $: lights = getLights(colorPool, brightness, glow, new Date().getTime(), randomizedOffsets);
-
-  $: console.log(lightSource)
+  $: randomizedOffsets = colorPool.map(() => Math.floor(Math.random() * glowPeriod));
+  $: finalBrightness = easeOut(brightness) * BRIGHTNESS_MULTIPLIER;
+  $: lightEmitter = tempatureVariantLightSource(colorTemperature);
+  $: lightSource = ledMode ? White : getColorFromTemperatureVariantLightSource(lightEmitter, brightness);
+  $: lights = getLights(colorPool, lightSource, finalBrightness, filterStrength, glow, new Date().getTime(), randomizedOffsets, ledMode, glowPeriod);
 
   onMount(()=> {
     const interval = setInterval(() => {
       if (glow) {
-        lights = getLights(colorPool, brightness, glow, new Date().getTime(), randomizedOffsets);
+        lights = getLights(colorPool, lightSource, finalBrightness, filterStrength, glow, new Date().getTime(), randomizedOffsets, ledMode, glowPeriod);
       }
     }, 8);
 
@@ -128,7 +134,7 @@
 <div class="color_simulator">
   <div class='lights' style:--lightsPerRow={NUM_LIGHTS_PER_ROW} style:--aspectRatio={aspectRatio} style:--inverseAspectRatio={inverseAspectRatio}>
     {#each lights as light}
-      <ColorBox lightSource={lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} brightnessAdjustment={light.brightnessAdjustment} bloom={bloom} coloredDiode={coloredDiode}></ColorBox>
+      <ColoredLight lightSource={light.lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} bloom={bloom} ledMode={ledMode}></ColoredLight>
     {/each}
   </div>
 </div>

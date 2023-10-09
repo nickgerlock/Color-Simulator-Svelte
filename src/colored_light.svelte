@@ -1,43 +1,42 @@
 <script lang="ts">
   import type { Color } from './lib/color';
-  import { scaleColor, setBrightness } from './lib/color'
-  import { colorString, getBrightness, getLuminance } from './lib/color';
+  import { scale, setBrightness, colorString } from './lib/color'
+  import { getBrightness, getLuminance } from './lib/color';
   import { getLightColors } from './lib/colored_light';
-  import bezier from 'bezier-easing';
 
   export let lightSource: Color;
   export let color: Color;
   export let filterStrength: number;
   export let brightness: number;
-  export let brightnessAdjustment: number | undefined;
   export let bloom: number = 0;
-  export let coloredDiode: boolean = false;
+  export let ledMode: boolean;
 
-  $: lightSource = coloredDiode ? setBrightness(color, 0.5) : lightSource;
-  $: scaledLightSource = brightness ? scaleColor(lightSource, brightness * (brightnessAdjustment || 1.0)) : lightSource;
+  const glowRadiusMultiplier = ledMode ? 8 : 12;
+  const glowTransparancyMultiplier = ledMode ? 0.4 : 0.2;
 
-  $: ({ low, mid, high } = getLightColors(scaledLightSource, color, filterStrength));
-  $: luminance = getBrightness(low);
+  $: ({ low, mid, high, glow, glowBrightness } = getLightColors(scale(lightSource, brightness), color, brightness, filterStrength));
   $: lowString = colorString(low);
   $: midString = colorString(mid);
   $: highString = colorString(high);
-  $: glow1 = colorString(low, luminance * 0.25);
-  $: glow2 = colorString(mid, luminance * 0.1);
-  $: glow3 = colorString(high, luminance * 0.1);
+
+  $: glowLow = colorString(low, getBrightness(low) * glowTransparancyMultiplier);
+  $: glowMid = colorString(mid, getBrightness(mid) * glowTransparancyMultiplier);
+  $: glowHigh = colorString(high, getBrightness(high) * glowTransparancyMultiplier);
+  $: glowRadius = `${Math.min(glowBrightness * glowRadiusMultiplier, 60)}vw`
   // $: glowRadius = `${bloom * luminance * 10}em`
-  $: glowRadius = `${bloom * luminance * 11}vw`
+
 </script>
 
 <div 
 style:--low={lowString}
 style:--mid={midString}
 style:--high={highString}
-style:--glow1={glow1}
-style:--glow2={glow2}
-style:--glow3={glow3}
+style:--glowLow={glowLow}
+style:--glowMid={glowMid}
+style:--glowHigh={glowHigh}
 style:--glowRadius={glowRadius}
 class="color_box">
-  <div class="layer_1 glow">
+  <div class="layer_1 glow_1">
     <div class="layer layer_1">
       <div class="layer layer_2">
         <div class="layer layer_3">
@@ -65,9 +64,9 @@ class="color_box">
     display: flex;
     border-radius: 2%;
   }
-  .color_box .glow {
+  .color_box .glow_1 {
     border-radius: 50%;
-    box-shadow: 0px 0px calc(var(--glowRadius) * 0.5) var(--glowRadius) var(--glow1);
+    box-shadow: 0px 0px calc(var(--glowRadius) * 0.5) var(--glowRadius) var(--glowLow);
   }
   .color_box .layer_1 {
     background-color: var(--low, #ddd);

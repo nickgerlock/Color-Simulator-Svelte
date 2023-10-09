@@ -8,21 +8,21 @@ export type RangeParameters = {
 
 export const BrightnessRange: RangeParameters = {
   min: 0,
-  max: 2,
+  max: 1.0,
   step: 0.01,
-  default: 0.9,
+  default: 0.5,
   list: [
     {
       value: 0, label: "0%",
     },
     {
-      value: 1, label: "25%",
+      value: 0.25, label: "25%",
     },
     {
-      value: 2, label: "50%",
+      value: 0.5, label: "50%",
     },
     {
-      value: 3, label: "100%",
+      value: 1.0, label: "100%",
     },
   ],
 }
@@ -89,3 +89,21 @@ export const FilterStrengthRange: RangeParameters = {
     },
   ],
 }
+
+export const GlowPeriodRange: RangeParameters = {
+  min: 500, // TODO probably higher
+  max: 16_000,
+  step: 500,
+  default: 8_000,
+  list: [
+    {
+      value: 1_000, label: "1s",
+    },
+    {
+      value: 8_000, label: "8s",
+    },
+    {
+      value: 16_000, label: "16s",
+    },
+  ],
+};

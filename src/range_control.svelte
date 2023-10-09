@@ -4,13 +4,16 @@
   export let name: string;
   export let label: string;
   export let rangeParameters: RangeParameters;
+  export let disabled: boolean = false;
   export let value = rangeParameters?.default;
+  export let onChange: ((...args: any) => any) = () => {};
+
   const listName = `${name}_list`;
 </script>
 
   <div class="{name} control">
     <label for="{name}">{label}</label>
-    <input bind:value={value} type="range" id={name} name={name} min={rangeParameters.min} max={rangeParameters.max} step={rangeParameters.step} list={listName}/>
+    <input bind:value={value} on:change={onChange} disabled={disabled} type="range" id={name} name={name} min={rangeParameters.min} max={rangeParameters.max} step={rangeParameters.step} list={listName}/>
 
     <datalist id={listName}>
       {#each (rangeParameters.list || []) as listEntry}

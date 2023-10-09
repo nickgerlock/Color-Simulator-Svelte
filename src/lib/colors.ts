@@ -1,4 +1,4 @@
-import { color } from './color';
+import { color, scale } from './color';
 
 export const Incandescent = color(1.0, .86, .39);
 
@@ -19,3 +19,6 @@ export const SpringGreen = color(0, 1.0, 0.5);
 export const Chartruse = color(0.5, 1.0, 0);
 export const Azure = color(0, 0.5, 1.0);
 export const Purple = color(0.5, 0, 1.0);
+
+
+export const LedOrange = color(1.0, 0.707106781186548, 0);
