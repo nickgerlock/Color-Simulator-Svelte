@@ -148,7 +148,7 @@
     overflow: visible;
   }
   .lights {
-    --maxHeight: 60vh; /* TODO: this is arbitrary */
+    --maxHeight: 80vh; /* TODO: this is arbitrary */
     --maxWidthFromHeight: calc((var(--maxHeight) * var(--aspectRatio)));
     --maxHeightFromWidth: calc((var(--maxWidth) * var(--inverseAspectRatio)));
     --maxWidth: min(80vw, var(--maxWidthFromHeight));
@@ -158,6 +158,7 @@
     margin-bottom: 0px;
     width: var(--maxWidth);
     max-height: var(--maxHeightFromWidth);
+    margin: auto;
 
     display: grid;
     

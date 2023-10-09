@@ -5,8 +5,7 @@
 
   let brightness: number = BrightnessRange.default;
   let bloom: number = BloomRange.default;
-  let colorTemperature: number = ColorTemperatureRange.default;
-  let filterStrength: number = FilterStrengthRange.default;
+  let colorTemperature: number = ColorTemperatureRange.default; let filterStrength: number = FilterStrengthRange.default;
   let glow: boolean = true;
   let glowPeriod: number = GlowPeriodRange.default;
   let ledMode: boolean = false;
@@ -51,6 +50,10 @@
   }
 
   .page {
+    height: 98%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 1em;
     /* height: 100%; */
     /* margin: 8px;
     padding: 8px; */
@@ -70,8 +73,9 @@
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    height: 85vh;
-    gap: 20px;
+    justify-content: space-between;
+    height: 100vh;
+    gap: 10px;
   }
 
   .color_simulator_container {
@@ -85,10 +89,27 @@
   }
 
   .color_controls_container {
-    margin-bottom: 1em;
     box-sizing: border-box;
-    flex-shrink: 1;
-    flex-grow: 1;
+  }
+
+  @media (min-width: 680px) {
+    .color_controls_container {
+      min-height: 400px;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .header {
+      display: none;
+    }
+
+    .color_simulator_container {
+      height: 48%;
+    }
+
+    .color_controls_container {
+      height: 48%;
+    }
   }
 
 </style>

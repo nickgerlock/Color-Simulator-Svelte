@@ -116,7 +116,9 @@ export function colorString(color: Color, opacity: number = 1): string {
   const useHDR = true;
   const colorSpace = useHDR ? 'display-p3' : 'srgb';
 
-  return `${colorSpace}(${color.red} ${color.green} ${color.blue} / ${opacity})`;
+  // return `rgb(${color.red * 100}% ${color.green * 100}% ${color.blue * 100}% / ${opacity})`;
+  // return `${colorSpace}(${color.red * 100}% ${color.green * 100}% ${color.blue * 100}% / ${opacity})`;
+  return `color(${colorSpace} ${color.red} ${color.green} ${color.blue} / ${opacity})`;
 }
 
 function getLinearizedChannel(colorChannel: number) {
