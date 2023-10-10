@@ -1,6 +1,8 @@
 <script lang="ts">
   import ColorControls from './color_controls.svelte';
+  import type { ColorOptionKey } from './color_options';
   import ColorSimulator from './color_simulator.svelte';
+    import { color } from './lib/color';
   import { BloomRange, BrightnessRange, ColorTemperatureRange, FilterStrengthRange, GlowPeriodRange } from './lib/ranges';
 
   let brightness: number = BrightnessRange.default;
@@ -9,6 +11,7 @@
   let glow: boolean = true;
   let glowPeriod: number = GlowPeriodRange.default;
   let ledMode: boolean = false;
+  let colorOption: ColorOptionKey = 'red_white_and_blue';
 </script>
 
 <div class="page">
@@ -18,13 +21,15 @@
 
   <div class="content">
     <div class="color_simulator_container">
-      <ColorSimulator brightness={brightness} colorTemperature={colorTemperature} filterStrength={filterStrength} bloom={bloom} glow={glow} glowPeriod={glowPeriod} ledMode={ledMode}></ColorSimulator>
+      <ColorSimulator brightness={brightness} colorTemperature={colorTemperature} filterStrength={filterStrength} bloom={bloom} glow={glow} glowPeriod={glowPeriod} ledMode={ledMode} colorOption={colorOption}></ColorSimulator>
     </div>
 
     <div class="color_controls_container">
-      <ColorControls bind:brightness={brightness} bind:colorTemperature={colorTemperature} bind:filterStrength={filterStrength} bind:bloom={bloom} bind:glow={glow} bind:glowPeriod={glowPeriod} bind:ledMode={ledMode}></ColorControls>
+      <ColorControls bind:brightness={brightness} bind:colorTemperature={colorTemperature} bind:filterStrength={filterStrength} bind:bloom={bloom} bind:glow={glow} bind:glowPeriod={glowPeriod} bind:ledMode={ledMode} bind:colorOption={colorOption}></ColorControls>
     </div>
   </div>
+
+  <div class="footer"></div>
 </div>
 
 <style>
@@ -50,31 +55,37 @@
   }
 
   .page {
-    height: 98%;
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
     display: flex;
     flex-direction: column;
-    padding-bottom: 1em;
     /* height: 100%; */
     /* margin: 8px;
     padding: 8px; */
   }
   .header {
-    box-sizing: border-box;
     padding: 0px 8px 0px 8px;
     margin: 0px 8px 0px 8px;
-    flex-grow: 0;
-    flex-shrink: 1;
-    flex-basis: 10%;
-    max-height: 10%;
+    height: 6em;
+  }
+
+  .footer {
+    height: 6em;
   }
   .content {
     box-sizing: border-box;
     overflow: visible;
     display: flex;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 100%;
+    /* This is a hack because I can't figure out how to make flex work on this. */
+    max-height: calc(100% - 12em);
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: space-between;
-    height: 100vh;
     gap: 10px;
   }
 
@@ -90,16 +101,27 @@
 
   .color_controls_container {
     box-sizing: border-box;
+    display: flex;
   }
 
-  @media (min-width: 680px) {
+  @media (min-width: 800px) {
     .color_controls_container {
-      min-height: 400px;
+      min-height: 90%;
+      width: 325px;
+    }
+
+    .color_simulator_container {
+      min-height: 90%;
+      width: calc(100% - 335px);
     }
   }
 
-  @media (max-width: 680px) {
+  @media (max-width: 800px) {
     .header {
+      display: none;
+    }
+
+    .footer {
       display: none;
     }
 

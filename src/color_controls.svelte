@@ -1,9 +1,12 @@
 <script lang="ts">
-  import type { Preset } from './presets';
+  import type { PresetKey } from './presets';
+  import { getAllColorOptions, type ColorOptionKey } from './color_options';
   import { debounce } from './lib/utils';
   import { BrightnessRange, ColorTemperatureRange, FilterStrengthRange, BloomRange, GlowPeriodRange } from "./lib/ranges";
   import { isPreset, getPreset, getAllPresets, getPresetLabel } from './presets';
   import RangeControl from "./range_control.svelte"
+    import SelectControl from './select_control.svelte';
+    import { color } from './lib/color';
 
   export let brightness: number = BrightnessRange.default;
   export let colorTemperature: number = ColorTemperatureRange.default;
@@ -12,9 +15,19 @@
   export let glow: boolean = false;
   export let ledMode: boolean = false;
   export let glowPeriod: number = GlowPeriodRange.default;
-  export let preset: Preset = "incandescent";
+  export let colorOption: ColorOptionKey = 'christmas';
+
+  export let preset: PresetKey = "incandescent";
 
   let showAdvanced = false;
+
+  function getPresetOptions() {
+    return getAllPresets().map(preset => ({value: preset.key, label: preset.label}));
+  }
+
+  function getColorOptions() {
+    return getAllColorOptions().map(colorOption => ({label: colorOption.label, value: colorOption.key}));
+  }
 
   function setPreset(selectedPreset: string): void {
     if (!isPreset(selectedPreset)) return;
@@ -27,10 +40,10 @@
     filterStrength = settings.filterStrength ?? filterStrength;
     glow = settings.glow ?? glow;
     ledMode = settings.ledMode ?? ledMode;
+    colorOption = settings.colorOption ?? colorOption;
   }
 
   const setGlowPeriod = debounce((e: Event & {currentTarget: EventTarget & HTMLInputElement}) => {
-    debugger
     // @ts-ignore
     const currentGlowPeriod = e[0].target.value
 
@@ -44,18 +57,9 @@
 
 <div class="controls container">
   <div class="basic controls">
-    <div class="mode dropdown control">
-      <div class="wrapper">
-        <label for="mode">Mode</label>
-        <select on:input={(e) => setPreset(e.currentTarget.value)} name="mode">
-          {#each getAllPresets() as preset}
-            <option value={preset}>
-              {getPresetLabel(preset)}
-            </option>
-          {/each}
-        </select>
-      </div>
-    </div>
+    <SelectControl name="mode" label="Mode" options={getPresetOptions()} onChange={setPreset}></SelectControl>
+
+    <SelectControl bind:value={colorOption} name="color_option" label="Colors" options={getColorOptions()}></SelectControl>
 
     <RangeControl bind:value={brightness} name="brightness" label="Brightness" rangeParameters={BrightnessRange}></RangeControl>
 
@@ -95,12 +99,11 @@
 <style>
   .controls.container {
     margin: auto;
-    margin-top: 0px;
     max-width: 300px;
     max-height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: scroll;
+    overflow: auto;
     box-sizing: border-box;
     background-color: #222222;
     border-radius: 10px;
@@ -126,21 +129,6 @@
     margin-top: 1em;
   }
 
-  .dropdown.control label {
-    display: block;
-    width: 100%;
-  }
-
-  .dropdown.control select {
-    display: block;
-    width: 100%;
-    text-align: center;
-  }
-
-  .dropdown.control {
-    margin-bottom: 2em;
-  }
-
   .control .wrapper {
     display: block;
     margin: auto;
@@ -162,10 +150,4 @@
     float: right;
   }
 
-  .control select {
-    margin: auto;
-    position: relative;
-    top: 4px;
-    float: right;
-  }
 </style>

@@ -7,9 +7,11 @@
 
   export let glow: boolean = false;
   export let glowPeriod: number = 8000;
-  export let glowRange: {start: number, end: number} = {start: 0.25, end: 1.0};
+  export let glowRange: {start: number, end: number} = {start: 0.5, end: 1.25};
 
   export let ledMode: boolean = false;
+
+  export let colorOption: ColorOptionKey = 'christmas';
 
   // TODO move definition. probably change it
   type Light = {
@@ -41,6 +43,8 @@
   } from './lib/colors';
   import { partition, repeatArray, repeat } from './lib/utils';
   import { ease, easeOut } from './lib/easing';
+    import bezier from 'bezier-easing';
+    import { getColors, type ColorOptionKey } from './color_options';
 
   function getLights(colors: Color[], lightSource: Color, brightness: number, filterStrength: number, glow: boolean, seed: number, offsets?: number[], ledMode=false, glowPeriod:number = 8000): Light[] {
     return colors.map((color, index) => {
@@ -66,15 +70,28 @@
   function computeGlowValue(seed: number, glowPeriod: number) {
     const progressValue = (seed % glowPeriod) / glowPeriod;
     const symmetricalizedProgressValue = Math.abs(progressValue - 0.5) * 2.0;
-    const rawGlowValue = symmetricalizedProgressValue;
+    const rawGlowValue = ease(symmetricalizedProgressValue);
     const scaledGlowValue = glowRange.start * (1 - rawGlowValue) + glowRange.end * (rawGlowValue)
     
     return scaledGlowValue;
   }
 
   const MAX_WIDTH_PER_NUM_COPIES = 400;
-  const NUM_LIGHTS_PER_ROW = 4;
   const BRIGHTNESS_MULTIPLIER = 1.5;
+  // Map [0, 1] to this range.
+
+  const mapBrightness = (brightness: number, ledMode: boolean) => {
+    const INCANDESCENT_CURVE = bezier(0.0, 1.08, 0.11, 0.87);
+    // const LED_CURVE = bezier(0.0, 1.08, 0.11, 0.87);
+    const LED_CURVE = easeOut;
+    const INCANDESCENT_BRIGHTNESS_RANGE = [0, 1.5];
+    const LED_BRIGHTNESS_RANGE = [0, 1.5];
+
+    const brightnessRange = ledMode ? LED_BRIGHTNESS_RANGE : INCANDESCENT_BRIGHTNESS_RANGE;
+    const curve = ledMode ? LED_CURVE : INCANDESCENT_CURVE;
+
+    return brightnessRange[0] + curve(brightness) * brightnessRange[1];
+  };
   const pureColors = [
     White,
     Black,
@@ -98,7 +115,6 @@
   let lightSource: Color;
   // let lightRows: Light[][];
 
-  const colorPool = repeatArray(christmasColors, 4);
   // Computed glow values for [0, ... , GLOW_PERIOD]
   let precomputedGlowValues: Map<number, number>;
   // TODO: should probably change this to a random walk.
@@ -106,21 +122,29 @@
     return [indexAsSeed, computeGlowValue(indexAsSeed, glowPeriod)];
   }));
 
-  const numLights = colorPool.length;
-  const numRows = numLights / NUM_LIGHTS_PER_ROW;
-  const aspectRatio = NUM_LIGHTS_PER_ROW / numRows;
-  const inverseAspectRatio = numRows / NUM_LIGHTS_PER_ROW;
 
-  $: randomizedOffsets = colorPool.map(() => Math.floor(Math.random() * glowPeriod));
-  $: finalBrightness = easeOut(brightness) * BRIGHTNESS_MULTIPLIER;
+  $: colorPool = getColors(colorOption); // TODO make this always square
+  $: finalBrightness = mapBrightness(brightness, ledMode);
   $: lightEmitter = tempatureVariantLightSource(colorTemperature);
   $: lightSource = ledMode ? White : getColorFromTemperatureVariantLightSource(lightEmitter, brightness);
-  $: lights = getLights(colorPool, lightSource, finalBrightness, filterStrength, glow, new Date().getTime(), randomizedOffsets, ledMode, glowPeriod);
+
+  $: console.log(numLightsPerColumn)
+
+  $: numLightsPerRow = colorPool.length;
+  $: numLightsPerColumn = colorPool.length;
+  // TODO: I think none of this is used.
+  $: aspectRatio = numLightsPerRow / numLightsPerColumn;
+  $: inverseAspectRatio = numLightsPerRow / numLightsPerColumn;
+  $: fullColorList = repeatArray(colorPool, numLightsPerColumn);
+  $: randomizedOffsets = fullColorList.map(() => Math.floor(Math.random() * glowPeriod));
+  $: numLights = fullColorList.length;
+
+  $: lights = getLights(fullColorList, lightSource, finalBrightness, filterStrength, glow, new Date().getTime(), randomizedOffsets, ledMode, glowPeriod);
 
   onMount(()=> {
     const interval = setInterval(() => {
       if (glow) {
-        lights = getLights(colorPool, lightSource, finalBrightness, filterStrength, glow, new Date().getTime(), randomizedOffsets, ledMode, glowPeriod);
+        lights = getLights(fullColorList, lightSource, finalBrightness, filterStrength, glow, new Date().getTime(), randomizedOffsets, ledMode, glowPeriod);
       }
     }, 8);
 
@@ -132,42 +156,57 @@
 </script>
 
 <div class="color_simulator">
-  <div class='lights' style:--lightsPerRow={NUM_LIGHTS_PER_ROW} style:--aspectRatio={aspectRatio} style:--inverseAspectRatio={inverseAspectRatio}>
+  <div class='lights' style:--lightsPerRow={numLightsPerRow} style:--aspectRatio={aspectRatio} style:--inverseAspectRatio={inverseAspectRatio}>
     {#each lights as light}
-      <ColoredLight lightSource={light.lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} bloom={bloom} ledMode={ledMode}></ColoredLight>
+      <ColoredLight lightSource={light.lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} bloom={bloom} ledMode={ledMode} numLights={numLights}></ColoredLight>
     {/each}
   </div>
 </div>
 
 <style>
+  @media (max-width: 800px) {
+  }
+
+
+  .lights {
+    --maxHeight: 100%;
+    --maxWidth: min(100%, var(--maxWidthFromHeight));
+  }
+
   .color_simulator {
+    display: flex;
     animation: fadein 0.4s;
-    display: grid;
+    flex-direction: column;
     flex-grow: 1;
     flex-shrink: 1;
     overflow: visible;
+    margin: auto;
+    aspect-ratio: 1;
+    max-height: 100%;
   }
   .lights {
-    --maxHeight: 80vh; /* TODO: this is arbitrary */
     --maxWidthFromHeight: calc((var(--maxHeight) * var(--aspectRatio)));
     --maxHeightFromWidth: calc((var(--maxWidth) * var(--inverseAspectRatio)));
-    --maxWidth: min(80vw, var(--maxWidthFromHeight));
     overflow: visible;
     margin: auto;
     margin-top: 0px;
     margin-bottom: 0px;
-    width: var(--maxWidth);
-    max-height: var(--maxHeightFromWidth);
     margin: auto;
+    box-sizing: border-box;
+    padding: 2em;
+
+    max-height: 100%;
+    max-width: 100%;
+    aspect-ratio: 1;
+
+    flex-grow: 1;
 
     display: grid;
     
     grid-auto-flow: row;
-    grid-row-gap: max(1.5vw, 10px);
-    grid-column-gap: max(1.5vw, 10px);
+    grid-gap: 2%;
     grid-template-columns: repeat(var(--lightsPerRow), minmax(0, 1fr));
-    grid-template-rows: repeat(auto, 10px);
-    /* grid-auto-rows: minmax(100px, auto); */
+    grid-auto-rows: min-content;
   }
   @keyframes fadein {
       from {

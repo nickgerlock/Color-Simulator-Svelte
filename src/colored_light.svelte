@@ -10,10 +10,12 @@
   export let brightness: number;
   export let bloom: number = 0;
   export let ledMode: boolean;
+  export let numLights: number = 16;
 
-  const glowRadiusMultiplier = ledMode ? 8 : 12;
   const glowTransparancyMultiplier = ledMode ? 0.4 : 0.2;
+  const glowRadiusMultiplierPerNumLights = 128;
 
+  $: glowRadiusMultiplier = glowRadiusMultiplierPerNumLights / (numLights) * (ledMode ? 1 : 1.5);
   $: ({ low, mid, high, glow, glowBrightness } = getLightColors(scale(lightSource, brightness), color, brightness, filterStrength));
   $: lowString = colorString(low);
   $: midString = colorString(mid);

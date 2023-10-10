@@ -11,16 +11,16 @@
   const listName = `${name}_list`;
 </script>
 
-  <div class="{name} control">
-    <label for="{name}">{label}</label>
-    <input bind:value={value} on:change={onChange} disabled={disabled} type="range" id={name} name={name} min={rangeParameters.min} max={rangeParameters.max} step={rangeParameters.step} list={listName}/>
+<div class="{name} control">
+  <label for="{name}">{label}</label>
+  <input bind:value={value} on:change={onChange} disabled={disabled} type="range" id={name} name={name} min={rangeParameters.min} max={rangeParameters.max} step={rangeParameters.step} list={listName}/>
 
-    <datalist id={listName}>
-      {#each (rangeParameters.list || []) as listEntry}
-        <option value="{listEntry.value}">{listEntry.label}</option>
-      {/each}
-    </datalist>
-  </div>
+  <datalist id={listName}>
+    {#each (rangeParameters.list || []) as listEntry}
+      <option value="{listEntry.value}">{listEntry.label}</option>
+    {/each}
+  </datalist>
+</div>
 
 <style>
   .control {
