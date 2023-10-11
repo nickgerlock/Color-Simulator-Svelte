@@ -2,7 +2,6 @@
   import ColorControls from './color_controls.svelte';
   import type { ColorOptionKey } from './color_options';
   import ColorSimulator from './color_simulator.svelte';
-    import { color } from './lib/color';
   import { BloomRange, BrightnessRange, ColorTemperatureRange, FilterStrengthRange, GlowPeriodRange } from './lib/ranges';
 
   let brightness: number = BrightnessRange.default;
@@ -11,7 +10,7 @@
   let glow: boolean = true;
   let glowPeriod: number = GlowPeriodRange.default;
   let ledMode: boolean = false;
-  let colorOption: ColorOptionKey = 'red_white_and_blue';
+  let colorOption: ColorOptionKey = 'christmas';
 </script>
 
 <div class="page">
@@ -81,13 +80,16 @@
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 100%;
+
     /* This is a hack because I can't figure out how to make flex work on this. */
-    max-height: calc(100% - 12em);
+    max-height: calc(100% - 1em);
+
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 10px;
   }
+
 
   .color_simulator_container {
     overflow: visible;
@@ -96,12 +98,13 @@
     /* flex-basis: 60%;
     max-height: 60%; */
     flex-shrink: 1;
-    flex-grow: 1;
+    flex-grow: 3;
   }
 
   .color_controls_container {
     box-sizing: border-box;
     display: flex;
+    flex-grow: 1;
   }
 
   @media (min-width: 800px) {
@@ -113,6 +116,11 @@
     .color_simulator_container {
       min-height: 90%;
       width: calc(100% - 335px);
+    }
+
+    .content {
+      /* This is a hack because I can't figure out how to make flex work on this. */
+      max-height: calc(100% - 12em);
     }
   }
 
@@ -126,11 +134,11 @@
     }
 
     .color_simulator_container {
-      height: 48%;
+      /* height: 48%; */
     }
 
     .color_controls_container {
-      height: 48%;
+      /* height: 48%; */
     }
   }
 

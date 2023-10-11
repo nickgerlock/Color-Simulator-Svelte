@@ -156,11 +156,12 @@
 </script>
 
 <div class="color_simulator">
-  <div class='lights' style:--lightsPerRow={numLightsPerRow} style:--aspectRatio={aspectRatio} style:--inverseAspectRatio={inverseAspectRatio}>
-    {#each lights as light}
-      <ColoredLight lightSource={light.lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} bloom={bloom} ledMode={ledMode} numLights={numLights}></ColoredLight>
-    {/each}
-  </div>
+
+    <div class='lights' style:--lightsPerRow={numLightsPerRow} style:--aspectRatio={aspectRatio} style:--inverseAspectRatio={inverseAspectRatio}>
+      {#each lights as light}
+        <ColoredLight lightSource={light.lightSource} color={light.color} filterStrength={filterStrength} brightness={light.brightness} bloom={bloom} ledMode={ledMode} numLights={numLights}></ColoredLight>
+      {/each}
+    </div>
 </div>
 
 <style>
@@ -182,7 +183,8 @@
     overflow: visible;
     margin: auto;
     aspect-ratio: 1;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
   }
   .lights {
     --maxWidthFromHeight: calc((var(--maxHeight) * var(--aspectRatio)));
@@ -195,8 +197,6 @@
     box-sizing: border-box;
     padding: 2em;
 
-    max-height: 100%;
-    max-width: 100%;
     aspect-ratio: 1;
 
     flex-grow: 1;
@@ -207,6 +207,9 @@
     grid-gap: 2%;
     grid-template-columns: repeat(var(--lightsPerRow), minmax(0, 1fr));
     grid-auto-rows: min-content;
+
+    /* height: 100%; */
+    max-width: 100%;
   }
   @keyframes fadein {
       from {
