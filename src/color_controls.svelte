@@ -122,7 +122,7 @@
   }
 
   .section {
-    border: solid 0.5px #505050;
+    border: solid 1px #404040;
     border-radius: 5px;
     padding: 0.5em;
     display: flex;
@@ -132,7 +132,8 @@
 
   .minor_divider {
     width: 100%;
-    border: solid 0.5px #303030;
+    border: solid 1px #303030;
+    border-top: 0px;
   }
 
   .control_group {
