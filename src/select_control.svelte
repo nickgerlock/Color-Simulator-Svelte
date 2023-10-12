@@ -23,28 +23,31 @@
 </div>
 
 <style>
+  .wrapper {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
   .select.control label {
     display: block;
-    width: 100%;
+    /* width: 100%; */
   }
 
   .select.control select {
     background-color: #111111;
     color: #AAAAAA;
-    display: block;
-    width: 100%;
+    /* width: 100%; */
     text-align: center;
+    flex-basis: 70%;
   }
 
   .select.control {
-    margin-bottom: 2em;
   }
 
   select {
-    margin: auto;
     position: relative;
-    top: 4px;
-    float: right;
   }
 
   label {

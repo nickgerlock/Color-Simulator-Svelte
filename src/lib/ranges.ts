@@ -91,7 +91,7 @@ export const FilterStrengthRange: RangeParameters = {
 }
 
 export const GlowPeriodRange: RangeParameters = {
-  min: 500,
+  min: 200,
   max: 16_000,
   step: 500,
   default: 8_000,

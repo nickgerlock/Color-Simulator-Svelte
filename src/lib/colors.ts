@@ -20,5 +20,8 @@ export const Chartruse = color(0.5, 1.0, 0);
 export const Azure = color(0, 0.5, 1.0);
 export const Purple = color(0.5, 0, 1.0);
 
+export const LightBlue = color(0.36, 0.81, 1.0);
+export const Pink = color(1.0, 0.46, 0.52);
+export const Violet = color(0.749, 0.545098039215686, 1.0);
 
 export const LedOrange = color(1.0, 0.707106781186548, 0);

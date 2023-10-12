@@ -75,6 +75,6 @@ const PresetConfigs: Record<PresetKey, PresetConfig> = {
     ledMode: false,
     glow: true,
     label: 'True Beauty',
-    colorOption: 'christmas',
+    // colorOption: 'christmas',
   },
 } as const;

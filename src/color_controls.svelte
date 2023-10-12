@@ -5,8 +5,8 @@
   import { BrightnessRange, ColorTemperatureRange, FilterStrengthRange, BloomRange, GlowPeriodRange } from "./lib/ranges";
   import { isPreset, getPreset, getAllPresets, getPresetLabel } from './presets';
   import RangeControl from "./range_control.svelte"
-    import SelectControl from './select_control.svelte';
-    import { color } from './lib/color';
+  import SelectControl from './select_control.svelte';
+  import CheckboxControl from './checkbox_control.svelte';
 
   export let brightness: number = BrightnessRange.default;
   export let colorTemperature: number = ColorTemperatureRange.default;
@@ -55,41 +55,47 @@
   }, 50);
 </script>
 
-<div class="controls container">
-  <div class="basic controls">
-    <SelectControl name="mode" label="Mode" options={getPresetOptions()} onChange={setPreset}></SelectControl>
+<div class="controls_container">
+  <div class="control_group basic">
 
-    <SelectControl bind:value={colorOption} name="color_option" label="Colors" options={getColorOptions()}></SelectControl>
+    <div class="section">
+      <SelectControl name="mode" label="Mode" options={getPresetOptions()} onChange={setPreset}></SelectControl>
 
-    <RangeControl bind:value={brightness} name="brightness" label="Brightness" rangeParameters={BrightnessRange}></RangeControl>
+      <div class="minor_divider" role="separator"></div>
 
-    <div class="glow checkbox control">
-      <div class="wrapper">
-        <label for="glow">Shimmer</label>
-        <input bind:checked={glow} type="checkbox" id=glow name=glow/>
-      </div>
+      <SelectControl bind:value={colorOption} name="color_option" label="Colors" options={getColorOptions()}></SelectControl>
+    </div>
+
+    <div class="section">
+      <RangeControl bind:value={brightness} name="brightness" label="Brightness" rangeParameters={BrightnessRange}></RangeControl>
+
+      <div class="minor_divider" role="separator"></div>
+
+      <CheckboxControl bind:checked={glow} name="glow" label="Shimmer"></CheckboxControl>
     </div>
   </div>
 
   {#if showAdvanced}
-    <button class="text_button advanced_toggle" on:click={(e) => showAdvanced = false}>Hide Advanced</button>
+    <div class="section">
+      <div class="control_group advanced">
+        <RangeControl bind:value={colorTemperature} disabled={ledMode} name="colorTemperature" label="Color Temperature" rangeParameters={ColorTemperatureRange}></RangeControl>
 
-    <div class="advanced controls">
-      <RangeControl bind:value={colorTemperature} disabled={ledMode} name="colorTemperature" label="Color Temperature" rangeParameters={ColorTemperatureRange}></RangeControl>
+        <div class="minor_divider" role="separator"></div>
 
-      <RangeControl bind:value={filterStrength} disabled={ledMode} name="filterStrength" label="Filter Strength" rangeParameters={FilterStrengthRange}></RangeControl>
+        <RangeControl bind:value={filterStrength} disabled={ledMode} name="filterStrength" label="Filter Strength" rangeParameters={FilterStrengthRange}></RangeControl>
 
-      <RangeControl disabled={!glow} bind:value={glowPeriod} name="glowPeriod" label="Shimmer Time" rangeParameters={GlowPeriodRange}></RangeControl>
+        <div class="minor_divider" role="separator"></div>
 
-      <!-- <RangeControl bind:value={bloom} name="bloom" label="Bloom" rangeParameters={BloomRange}></RangeControl> -->
+        <RangeControl disabled={!glow} bind:value={glowPeriod} name="glowPeriod" label="Shimmer Time" rangeParameters={GlowPeriodRange}></RangeControl>
 
-      <div class="led_mode checkbox control">
-        <div class="wrapper">
-          <label for="led_mode">LED Mode</label>
-          <input bind:checked={ledMode} type="checkbox" id=led_mode name=led_mode/>
-        </div>
+        <div class="minor_divider" role="separator"></div>
+
+        <!-- <RangeControl bind:value={bloom} name="bloom" label="Bloom" rangeParameters={BloomRange}></RangeControl> -->
+
+        <CheckboxControl bind:checked={ledMode} name="led_mode" label="LED Mode"></CheckboxControl>
       </div>
     </div>
+    <button class="text_button advanced_toggle" on:click={(e) => showAdvanced = false}>Hide Advanced</button>
   {:else}
     <button class="text_button advanced_toggle" on:click={(e) => showAdvanced = true}>Advanced</button>
   {/if}
@@ -97,17 +103,42 @@
   </div>
 
 <style>
-  .controls.container {
+  .controls_container {
     margin: auto;
-    max-width: 300px;
+    margin-bottom: 0px;
+    margin-top: auto;
+
+    width: 20em;
     max-height: 100%;
     display: flex;
     flex-direction: column;
+    gap: 0.5em;
+
     overflow: auto;
     box-sizing: border-box;
     background-color: #222222;
     border-radius: 10px;
     padding: 1em;
+  }
+
+  .section {
+    border: solid 0.5px #505050;
+    border-radius: 5px;
+    padding: 0.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .minor_divider {
+    width: 100%;
+    border: solid 0.5px #303030;
+  }
+
+  .control_group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
   }
 
   .control {
@@ -129,25 +160,16 @@
     margin-top: 1em;
   }
 
-  .control .wrapper {
-    display: block;
-    margin: auto;
-    width: 14em;
-    padding-left: 1em;
-    padding-right: 1em;
-    box-sizing: border-box;
-  }
-
   .control label {
     text-align: center;
   }
-  .control input {
-    margin: auto;
-    width: 1.5em;
-    height: 1.5em;
-    position: relative;
-    top: 4px;
-    float: right;
+
+  @media (min-aspect-ratio: 1) {
+    .controls_container {
+      margin-top: 4em;
+      margin-bottom: auto;
+    }
   }
+
 
 </style>

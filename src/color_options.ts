@@ -1,4 +1,5 @@
 import type { Color } from './lib/color';
+import { scale } from './lib/color';
 import {
   White,
   Black,
@@ -12,8 +13,14 @@ import {
   Cyan,
 
   Orange,
+  Purple,
+
   Azure,
   LedOrange,
+  Pink,
+  LightBlue,
+  HotPink,
+  Violet,
 } from './lib/colors';
 
 type FullColorOption = ColorOption & {key: ColorOptionKey};
@@ -43,8 +50,11 @@ interface ColorOption {
 
 const ColorOptions = [
   'christmas',
-  'test_pattern_colors',
-  'red_white_and_blue',
+  'rainbow',
+  'warm',
+  'cool',
+  'trans',
+  'full_pallette',
 ] as const;
 
 const ColorOptionConfigs: Record<ColorOptionKey, ColorOption> = {
@@ -57,27 +67,59 @@ const ColorOptionConfigs: Record<ColorOptionKey, ColorOption> = {
       Red,
     ],
   },
-  red_white_and_blue: {
-    label: "Red White & Blue",
+  rainbow: {
+    label: "Rainbow",
     colors: [
       Red,
-      White,
-      Blue,
-      Red,
-      White,
-      Blue,
-    ],
-  },
-  test_pattern_colors: {
-    label: "Test Pallette",
-    colors: [
-      White,
-      Red,
+      Orange,
+      Yellow,
       Green,
       Blue,
-      Yellow,
-      Magenta,
-      Cyan,
+      Purple,
+      Violet,
     ],
+  },
+  warm: {
+    label: "Warm",
+    colors: [
+      Red,
+      Orange,
+      Yellow,
+      Red,
+      Orange,
+      Yellow,
+    ],
+  },
+  cool: {
+    label: "Cool",
+    colors: [
+      Blue,
+      Green,
+      Purple, Blue,
+      Green,
+      Purple,
+    ],
+  },
+  trans: {
+    label: "Trans Rights",
+    colors: [
+      Azure,
+      HotPink,
+      White,
+      HotPink,
+      Azure,
+    ],
+  },
+  full_pallette: {
+    label: "SMPTE Colors",
+    colors: [
+      White,
+      Yellow,
+      Cyan,
+      Green,
+      Magenta,
+      Red,
+      Blue,
+    ].map((color) => scale(color, 0.75)),
   }
 };

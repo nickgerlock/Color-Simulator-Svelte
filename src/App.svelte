@@ -81,13 +81,14 @@
     flex-shrink: 1;
     flex-basis: 100%;
 
-    /* This is a hack because I can't figure out how to make flex work on this. */
-    max-height: calc(100% - 1em);
+    width: min(100%, 1920px);
 
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: space-between;
+    align-content: space-around;
     gap: 10px;
+    margin: auto;
   }
 
 
@@ -95,36 +96,37 @@
     overflow: visible;
     box-sizing: border-box;
     display: flex;
-    /* flex-basis: 60%;
-    max-height: 60%; */
+    flex-grow: 10;
     flex-shrink: 1;
-    flex-grow: 3;
+    aspect-ratio: 1;
+    max-width: 100%;
   }
 
   .color_controls_container {
     box-sizing: border-box;
     display: flex;
-    flex-grow: 1;
+    flex-shrink: 1;
+    padding: 1em;
   }
 
-  @media (min-width: 800px) {
-    .color_controls_container {
-      min-height: 90%;
-      width: 325px;
+  @media (min-aspect-ratio: 1) {
+    .color_simulator_container {
+      max-width: calc(100% - 400px);
+      /* min-height: 90%; */
+      /* max-width: calc(min(100% - 400px, 1080px)); */
     }
 
-    .color_simulator_container {
-      min-height: 90%;
-      width: calc(100% - 335px);
+    .color_controls_container {
+      height: 100%;
+      width: 325px;
+      margin-bottom: auto;
     }
 
     .content {
-      /* This is a hack because I can't figure out how to make flex work on this. */
-      max-height: calc(100% - 12em);
     }
   }
 
-  @media (max-width: 800px) {
+  @media (max-aspect-ratio: 1) {
     .header {
       display: none;
     }
@@ -134,6 +136,8 @@
     }
 
     .color_simulator_container {
+      /* width: 100%; */
+      /* max-height: 60%; */
       /* height: 48%; */
     }
 

@@ -41,7 +41,7 @@
     Azure,
     LedOrange,
   } from './lib/colors';
-  import { partition, repeatArray, repeat } from './lib/utils';
+  import { partition, repeatArray, repeat, rotate } from './lib/utils';
   import { ease, easeOut } from './lib/easing';
     import bezier from 'bezier-easing';
     import { getColors, type ColorOptionKey } from './color_options';
@@ -136,6 +136,7 @@
   $: aspectRatio = numLightsPerRow / numLightsPerColumn;
   $: inverseAspectRatio = numLightsPerRow / numLightsPerColumn;
   $: fullColorList = repeatArray(colorPool, numLightsPerColumn);
+  // $: fullColorList = repeat(colorPool, numLightsPerColumn).map((array, index) => rotate(array, index)).flat();
   $: randomizedOffsets = fullColorList.map(() => Math.floor(Math.random() * glowPeriod));
   $: numLights = fullColorList.length;
 
@@ -168,7 +169,6 @@
   @media (max-width: 800px) {
   }
 
-
   .lights {
     --maxHeight: 100%;
     --maxWidth: min(100%, var(--maxWidthFromHeight));
@@ -184,8 +184,9 @@
     margin: auto;
     aspect-ratio: 1;
     width: 100%;
-    height: 100%;
+    max-height: 100%;
   }
+
   .lights {
     --maxWidthFromHeight: calc((var(--maxHeight) * var(--aspectRatio)));
     --maxHeightFromWidth: calc((var(--maxWidth) * var(--inverseAspectRatio)));
@@ -211,6 +212,7 @@
     /* height: 100%; */
     max-width: 100%;
   }
+
   @keyframes fadein {
       from {
           opacity: 0;

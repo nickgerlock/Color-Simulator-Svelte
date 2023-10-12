@@ -76,9 +76,9 @@ export function filter(input: Color, filter: Color, brightness: number = 1.0, fi
   }
 
   const inputMaxChannel = getMaxChannelValue(input);
-  const inputMaximized = scale(input, 1 / inputMaxChannel);
+  const inputMaximized = inputMaxChannel === 0 ? input : scale(input, 1 / inputMaxChannel);
   const filterMaxChannel = getMaxChannelValue(filter);
-  const filterMaximized = scale(filter, 1 / filterMaxChannel);
+  const filterMaximized = filterMaxChannel === 0 ? filter : scale(filter, 1 / filterMaxChannel);
   const filtered = scale(color(
     Math.min(inputMaximized.red, filterMaximized.red),
     Math.min(inputMaximized.green, filterMaximized.green),

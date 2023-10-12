@@ -17,6 +17,12 @@ export function repeatArray<T>(array: Array<T>, numRepetitions: number = 1): Arr
   return repeat(array, numRepetitions).flat();
 }
 
+export function rotate<T>(array: Array<T>, rotationAmount: number = 0): Array<T> {
+  return array.map((_, index) => {
+    return array[(index - rotationAmount + array.length) % array.length];
+  });
+}
+
 /**
  * 
  * @param a - Any number.
