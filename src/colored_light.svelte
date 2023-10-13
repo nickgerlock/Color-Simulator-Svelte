@@ -54,8 +54,7 @@ class="color_box">
     grid-column-end: auto;
     display: block;
     aspect-ratio: 1;
-    width: 100%;
-    height: 100%;
+    padding: 5%;
     /* flex-basis: 100px; */
     /* flex-grow: 1; */
     /* flex-shrink: 1; */
@@ -72,16 +71,13 @@ class="color_box">
   }
   .color_box .layer_1 {
     background-color: var(--low, #ddd);
-    /* box-shadow: 0px 0px 20px var(--glowRadius) var(--glow1); */
   }
   .color_box .layer_2 {
     width: 75%;
     background-color: var(--mid, #ddd);
-    /* box-shadow: 0px 0px 20px calc(var(--glowRadius)) var(--glow2); */
   }
   .color_box .layer_3 {
     width: 50%;
     background-color: var(--high, #ddd);
-    /* box-shadow: 0px 0px 20px calc(var(--glowRadius)) var(--glow3); */
   }
 </style>

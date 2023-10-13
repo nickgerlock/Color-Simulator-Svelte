@@ -13,6 +13,19 @@
 
   export let colorOption: ColorOptionKey = 'christmas';
 
+  import { onMount } from 'svelte';
+  import { getColorFromTemperatureVariantLightSource, tempatureVariantLightSource } from './lib/color_temperature';
+
+  import ColoredLight from './colored_light.svelte';
+  import type { Color } from './lib/color';
+  import {
+    White,
+  } from './lib/colors';
+  import { partition, repeatArray, repeat, rotate } from './lib/utils';
+  import { ease, easeOut } from './lib/easing';
+  import bezier from 'bezier-easing';
+  import { getColors, type ColorOptionKey } from './color_options';
+
   // TODO move definition. probably change it
   type Light = {
     color: Color,
@@ -21,41 +34,16 @@
     filterStrength: number,
   };
 
-  import { onMount } from 'svelte';
-  import { Incandescent, getColorFromTemperatureVariantLightSource, tempatureVariantLightSource } from './lib/color_temperature';
-
-  import ColoredLight from './colored_light.svelte';
-  import type { Color } from './lib/color';
-  import { scale, mix, color } from './lib/color';
-  import { getColorByTemperature, getColorByTemperatureWithBrightness } from './lib/color_temperature';
-  import {
-    White,
-    Black,
-    Red,
-    Green,
-    Blue,
-    Yellow,
-    Magenta,
-    Cyan,
-    Orange,
-    Azure,
-    LedOrange,
-  } from './lib/colors';
-  import { partition, repeatArray, repeat, rotate } from './lib/utils';
-  import { ease, easeOut } from './lib/easing';
-    import bezier from 'bezier-easing';
-    import { getColors, type ColorOptionKey } from './color_options';
-
   function getLights(colors: Color[], lightSource: Color, brightness: number, filterStrength: number, glow: boolean, seed: number, offsets?: number[], ledMode=false, glowPeriod:number = 8000): Light[] {
     return colors.map((color, index) => {
       lightSource = ledMode ? color : lightSource;
       let glowValue: number = 1.0;
       if (glow) {
         const progressValue = (seed % glowPeriod);
-        const offset = (offsets?.[index] || Math.floor((index / colors.length) * glowPeriod));
+        const offset = (offsets?.[index] || Math.floor(((colors.length - index) / colors.length) * glowPeriod));
         const progressValueOffset = (progressValue + offset) % glowPeriod;
 
-        glowValue = precomputedGlowValues.get(progressValueOffset) as number;
+        glowValue = precomputedGlowValues[progressValueOffset] as number;
       }
 
       return {
@@ -76,11 +64,9 @@
     return scaledGlowValue;
   }
 
-  const MAX_WIDTH_PER_NUM_COPIES = 400;
-  const BRIGHTNESS_MULTIPLIER = 1.5;
-  // Map [0, 1] to this range.
-
-  const mapBrightness = (brightness: number, ledMode: boolean) => {
+  // Maps brightnesses within 0-1 to a different range, following
+  // a specific brightness curve.
+  function mapBrightness(brightness: number, ledMode: boolean) {
     const INCANDESCENT_CURVE = bezier(0.0, 1.08, 0.11, 0.87);
     // const LED_CURVE = bezier(0.0, 1.08, 0.11, 0.87);
     const LED_CURVE = easeOut;
@@ -92,52 +78,30 @@
 
     return brightnessRange[0] + curve(brightness) * brightnessRange[1];
   };
-  const pureColors = [
-    White,
-    Black,
-    Red,
-    Green,
-    Blue,
-    Yellow,
-    Magenta,
-    Cyan,
-  ];
-  const christmasColors = [
-    // mix(Blue, Azure, 0.75),
-    Blue,
-    Green,
-    // ledMode ? LedOrange: Orange,
-    Orange,
-    Red,
-  ];
 
   let lights: Light[];
   let lightSource: Color;
-  // let lightRows: Light[][];
 
   // Computed glow values for [0, ... , GLOW_PERIOD]
-  let precomputedGlowValues: Map<number, number>;
+  let precomputedGlowValues: Record<number, number>;
   // TODO: should probably change this to a random walk.
-  $: precomputedGlowValues = new Map(new Array(glowPeriod).fill(undefined).map((item, indexAsSeed) => {
+  $: precomputedGlowValues = Object.fromEntries(new Array(glowPeriod).fill(undefined).map((item, indexAsSeed) => {
     return [indexAsSeed, computeGlowValue(indexAsSeed, glowPeriod)];
   }));
 
-
-  $: colorPool = getColors(colorOption); // TODO make this always square
+  $: colorPool = getColors(colorOption);
   $: finalBrightness = mapBrightness(brightness, ledMode);
   $: lightEmitter = tempatureVariantLightSource(colorTemperature);
   $: lightSource = ledMode ? White : getColorFromTemperatureVariantLightSource(lightEmitter, brightness);
 
-  $: console.log(numLightsPerColumn)
-
   $: numLightsPerRow = colorPool.length;
   $: numLightsPerColumn = colorPool.length;
-  // TODO: I think none of this is used.
   $: aspectRatio = numLightsPerRow / numLightsPerColumn;
   $: inverseAspectRatio = numLightsPerRow / numLightsPerColumn;
   $: fullColorList = repeatArray(colorPool, numLightsPerColumn);
   // $: fullColorList = repeat(colorPool, numLightsPerColumn).map((array, index) => rotate(array, index)).flat();
   $: randomizedOffsets = fullColorList.map(() => Math.floor(Math.random() * glowPeriod));
+  // $: randomizedOffsets = undefined;
   $: numLights = fullColorList.length;
 
   $: lights = getLights(fullColorList, lightSource, finalBrightness, filterStrength, glow, new Date().getTime(), randomizedOffsets, ledMode, glowPeriod);
@@ -205,7 +169,6 @@
     display: grid;
     
     grid-auto-flow: row;
-    grid-gap: 2%;
     grid-template-columns: repeat(var(--lightsPerRow), minmax(0, 1fr));
     grid-auto-rows: min-content;
 

@@ -112,13 +112,21 @@ export function getLuminance(color: Color) {
   return 0.2126 * getLinearizedChannel(color.red) + 0.7152 * getLinearizedChannel(color.green) + 0.0722 * getLinearizedChannel(color.blue);
 }
 
+// TODO: this should be defined somewhere that is browser-specific
 export function colorString(color: Color, opacity: number = 1): string {
   const useHDR = true;
   const colorSpace = useHDR ? 'display-p3' : 'srgb';
+  const hardClipped = color;
 
-  // return `rgb(${color.red * 100}% ${color.green * 100}% ${color.blue * 100}% / ${opacity})`;
-  // return `${colorSpace}(${color.red * 100}% ${color.green * 100}% ${color.blue * 100}% / ${opacity})`;
-  return `color(${colorSpace} ${color.red} ${color.green} ${color.blue} / ${opacity})`;
+  return `color(${colorSpace} ${hardClipped.red} ${hardClipped.green} ${hardClipped.blue} / ${opacity})`;
+}
+
+function hardClip(input: Color) {
+  return color(
+    Math.min(input.red, MAXIMUM_COLOR_VALUE * 1),
+    Math.min(input.green, MAXIMUM_COLOR_VALUE * 1),
+    Math.min(input.blue, MAXIMUM_COLOR_VALUE * 1),
+  );
 }
 
 function getLinearizedChannel(colorChannel: number) {

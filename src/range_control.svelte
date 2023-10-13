@@ -14,7 +14,7 @@
 <div class="{name} control">
   <label for="{name}">{label}</label>
   <div class="input_with_markers">
-    <input bind:value={value} on:change={onChange} disabled={disabled} type="range" id={name} name={name} min={rangeParameters.min} max={rangeParameters.max} step={rangeParameters.step} list={listName}/>
+    <input bind:value={value} on:input={(e) => onChange(e.currentTarget.value)} disabled={disabled} type="range" id={name} name={name} min={rangeParameters.min} max={rangeParameters.max} step={rangeParameters.step} list={listName}/>
 
     <datalist id={listName}>
       {#each (rangeParameters.list || []) as listEntry}

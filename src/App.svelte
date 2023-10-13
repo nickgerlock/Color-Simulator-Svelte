@@ -15,7 +15,7 @@
 
 <div class="page">
   <div class="header">
-    <h1>Color Simulator</h1>
+    <h1>Cozy-Brite Light Simulator</h1>
   </div>
 
   <div class="content">
@@ -126,23 +126,13 @@
     }
   }
 
-  @media (max-aspect-ratio: 1) {
+  @media (max-width: 800px) {
     .header {
       display: none;
     }
 
     .footer {
       display: none;
-    }
-
-    .color_simulator_container {
-      /* width: 100%; */
-      /* max-height: 60%; */
-      /* height: 48%; */
-    }
-
-    .color_controls_container {
-      /* height: 48%; */
     }
   }
 

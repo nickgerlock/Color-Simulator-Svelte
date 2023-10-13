@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { cubicIn, cubicInOut } from 'svelte/easing';
+  import { slide } from 'svelte/transition';
   import type { PresetKey } from './presets';
   import { getAllColorOptions, type ColorOptionKey } from './color_options';
   import { debounce } from './lib/utils';
@@ -43,16 +45,18 @@
     colorOption = settings.colorOption ?? colorOption;
   }
 
-  const setGlowPeriod = debounce((e: Event & {currentTarget: EventTarget & HTMLInputElement}) => {
-    // @ts-ignore
-    const currentGlowPeriod = e[0].target.value
+  // let glowTimer: number;
+  // const setGlowPeriod = (glowValue: string) => {
+  //   clearTimeout(glowTimer);
 
-    glowPeriod;
+  //   glowTimer = setTimeout(() => {
+  //     glowPeriod = +glowValue;
+  //   }, 50);
+  // };
 
-    console.log("SETTING GLOW PERIOD")
-    console.log(glowPeriod)
-    glowPeriod = currentGlowPeriod;
-  }, 50);
+  const setGlowPeriod = debounce((glowPeriodValue: string) => {
+    glowPeriod = +glowPeriodValue;
+  }, 200);
 </script>
 
 <div class="controls_container">
@@ -76,25 +80,29 @@
   </div>
 
   {#if showAdvanced}
-    <div class="section">
-      <div class="control_group advanced">
-        <RangeControl bind:value={colorTemperature} disabled={ledMode} name="colorTemperature" label="Color Temperature" rangeParameters={ColorTemperatureRange}></RangeControl>
+    <div class="section_wrapper" transition:slide={{ axis: 'y', duration: 100, }}>
+      <div class="section">
+        <div class="control_group advanced">
+          <RangeControl bind:value={colorTemperature} disabled={ledMode} name="colorTemperature" label="Color Temperature" rangeParameters={ColorTemperatureRange}></RangeControl>
 
-        <div class="minor_divider" role="separator"></div>
+          <div class="minor_divider" role="separator"></div>
 
-        <RangeControl bind:value={filterStrength} disabled={ledMode} name="filterStrength" label="Filter Strength" rangeParameters={FilterStrengthRange}></RangeControl>
+          <RangeControl bind:value={filterStrength} disabled={ledMode} name="filterStrength" label="Filter Strength" rangeParameters={FilterStrengthRange}></RangeControl>
 
-        <div class="minor_divider" role="separator"></div>
+          <div class="minor_divider" role="separator"></div>
 
-        <RangeControl disabled={!glow} bind:value={glowPeriod} name="glowPeriod" label="Shimmer Time" rangeParameters={GlowPeriodRange}></RangeControl>
+          <RangeControl disabled={!glow} onChange={setGlowPeriod} name="glowPeriod" label="Shimmer Time" rangeParameters={GlowPeriodRange}></RangeControl>
 
-        <div class="minor_divider" role="separator"></div>
+          <div class="minor_divider" role="separator"></div>
 
-        <!-- <RangeControl bind:value={bloom} name="bloom" label="Bloom" rangeParameters={BloomRange}></RangeControl> -->
+          <!-- <RangeControl bind:value={bloom} name="bloom" label="Bloom" rangeParameters={BloomRange}></RangeControl> -->
 
-        <CheckboxControl bind:checked={ledMode} name="led_mode" label="LED Mode"></CheckboxControl>
+          <CheckboxControl bind:checked={ledMode} name="led_mode" label="LED Mode"></CheckboxControl>
+        </div>
       </div>
     </div>
+  {/if}
+  {#if showAdvanced}
     <button class="text_button advanced_toggle" on:click={(e) => showAdvanced = false}>Hide Advanced</button>
   {:else}
     <button class="text_button advanced_toggle" on:click={(e) => showAdvanced = true}>Advanced</button>
@@ -142,22 +150,23 @@
     gap: 0.5em;
   }
 
-  .control {
-    margin: auto;
-    width: 100%;
-  }
-
   .text_button {
     width: 200px;
     background: none;
+    display: block;
     border: 0;
     cursor: pointer; 
     margin: auto;
     text-decoration: underline;
-    color: #CCCCCC;
+    color: #AAAAAA;
+  }
+
+  .text_button:hover {
+    color: #EEEEEE;
   }
 
   .advanced_toggle {
+    margin: auto;
     margin-top: 1em;
   }
 

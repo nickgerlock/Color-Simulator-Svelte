@@ -33,16 +33,14 @@ export function interpolate(a: number, b: number, t: number): number {
   return (a * (1 - t) + (b * t));
 }
 
+
 export function debounce<F extends (...args: any) => any>(f: F, ms: number) {
-  let timeout: number;
+  let timer: number;
 
   return (...args: Parameters<F>) => {
-    const later = () => {
-      clearTimeout(timeout);
-      return f(args);
-    };
-
-    clearTimeout(timeout);
-    timeout = setTimeout(later, ms);
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      f(args);
+    }, ms);
   };
 };
